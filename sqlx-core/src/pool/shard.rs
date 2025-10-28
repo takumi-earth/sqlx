@@ -1,4 +1,6 @@
+use crate::rt;
 use event_listener::{listener, Event, IntoNotification};
+use futures_util::{future, stream, StreamExt};
 use spin::lock_api::Mutex;
 use std::future::Future;
 use std::num::NonZero;
@@ -9,8 +11,6 @@ use std::sync::{atomic, Arc};
 use std::task::{ready, Poll};
 use std::time::Duration;
 use std::{array, iter};
-use futures_util::{future, stream, StreamExt};
-use crate::rt;
 
 type ShardId = usize;
 type ConnectionIndex = usize;
@@ -90,7 +90,12 @@ const MAX_SHARD_SIZE: usize = if usize::BITS > 64 {
 };
 
 impl<T> Sharded<T> {
-    pub fn new(connections: usize, shards: NonZero<usize>, min_connections: usize, do_reconnect: impl Fn(DisconnectedSlot<T>) + Send + Sync + 'static) -> Sharded<T> {
+    pub fn new(
+        connections: usize,
+        shards: NonZero<usize>,
+        min_connections: usize,
+        do_reconnect: impl Fn(DisconnectedSlot<T>) + Send + Sync + 'static,
+    ) -> Sharded<T> {
         let params = Params::calc(connections, shards.get());
 
         let global = Arc::new(Global {
@@ -118,7 +123,7 @@ impl<T> Sharded<T> {
     #[allow(clippy::cast_possible_truncation)] // This is only informational
     pub fn count_connected(&self) -> usize {
         atomic::fence(Ordering::Acquire);
-        
+
         self.shards
             .iter()
             .map(|shard| shard.connected_set.load(Ordering::Relaxed).count_ones() as usize)
@@ -220,17 +225,22 @@ impl<T> Sharded<T> {
         })
         .await
     }
-    
-    pub fn acquire_min_connections(&self) -> impl Iterator<Item = DisconnectedSlot<T>> + '_ {
-        self.shards.iter()
-            .flat_map(|shard| shard.acquire_min_connections())
+
+    pub fn iter_min_connections(&self) -> impl Iterator<Item = DisconnectedSlot<T>> + '_ {
+        self.shards
+            .iter()
+            .flat_map(|shard| shard.iter_min_connections())
+    }
+
+    pub fn iter_idle(&self) -> impl Iterator<Item = ConnectedSlot<T>> + '_ {
+        self.shards.iter().flat_map(|shard| shard.iter_idle())
     }
 
     pub async fn drain<F, Fut>(&self, close: F)
-        where
-            F: Fn(ConnectedSlot<T>) -> Fut + Send + Sync + 'static,
-            Fut: Future<Output = DisconnectedSlot<T>> + Send + 'static,
-            T: Send + 'static
+    where
+        F: Fn(ConnectedSlot<T>) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = DisconnectedSlot<T>> + Send + 'static,
+        T: Send + 'static,
     {
         let close = Arc::new(close);
 
@@ -279,7 +289,7 @@ impl<T> Shard<T, [Arc<Mutex<Option<T>>>]> {
     }
 
     #[inline]
-    fn unlocked_mask(&self, connected: bool) -> usize {
+    fn unlocked_mask(&self, connected: bool) -> Mask {
         let locked_set = self.locked_set.load(Ordering::Acquire);
         let connected_set = self.connected_set.load(Ordering::Relaxed);
 
@@ -289,15 +299,13 @@ impl<T> Shard<T, [Arc<Mutex<Option<T>>>]> {
             !connected_set
         };
 
-        !locked_set & connected_mask
+        Mask(!locked_set & connected_mask)
     }
 
     /// Choose the first index that is unlocked with bit `connected`
     #[inline]
-    fn next_unlocked(&self, connected: bool) -> Option<usize> {
-        let mask = self.unlocked_mask(connected);
-
-        (mask != 0).then_some(mask.trailing_zeros() as usize)
+    fn next_unlocked(&self, connected: bool) -> Option<ConnectionIndex> {
+        self.unlocked_mask(connected).next()
     }
 
     async fn acquire(self: &Arc<Self>, connected: bool) -> SlotGuard<T> {
@@ -329,9 +337,7 @@ impl<T> Shard<T, [Arc<Mutex<Option<T>>>]> {
     }
 
     fn try_lock(self: &Arc<Self>, index: ConnectionIndex) -> Option<SlotGuard<T>> {
-        let locked = self.connections
-            .get(index)?
-            .try_lock_arc()?;
+        let locked = self.connections.get(index)?.try_lock_arc()?;
 
         // The locking of the connection itself must use an `Acquire` fence,
         // so additional synchronization is unnecessary.
@@ -343,16 +349,25 @@ impl<T> Shard<T, [Arc<Mutex<Option<T>>>]> {
             index,
         })
     }
-    
-    fn acquire_min_connections(self: &Arc<Self>) -> impl Iterator<Item = DisconnectedSlot<T>> + '_ {
-        (0 .. self.connections.len())
+
+    fn iter_min_connections(self: &Arc<Self>) -> impl Iterator<Item = DisconnectedSlot<T>> + '_ {
+        (0..self.connections.len())
             .filter_map(|index| {
                 let slot = self.try_lock(index)?;
-                
+
                 // Guard against some weird bug causing this to already be connected
                 slot.get().is_none().then_some(DisconnectedSlot(slot))
             })
-                .take(self.global.shard_min_connections(self.shard_id))
+            .take(self.global.shard_min_connections(self.shard_id))
+    }
+
+    fn iter_idle(self: &Arc<Self>) -> impl Iterator<Item = ConnectedSlot<T>> + '_ {
+        self.unlocked_mask(true).filter_map(|index| {
+            let slot = self.try_lock(index)?;
+
+            // Guard against some weird bug causing this to already be connected
+            slot.get().is_some().then_some(ConnectedSlot(slot))
+        })
     }
 
     async fn drain<F, Fut>(self: &Arc<Self>, close: F)
@@ -395,7 +410,8 @@ impl<T> Shard<T, [Arc<Mutex<Option<T>>>]> {
             let _ = drain_leaked.as_mut().poll(cx);
 
             Poll::Pending
-        }).await;
+        })
+        .await;
     }
 }
 
@@ -440,10 +456,24 @@ impl<T> DisconnectedSlot<T> {
     pub fn leak(mut self: Self) {
         self.0.locked = None;
 
-        atomic_set(&self.0.shard.connected_set, self.0.index, false, Ordering::Relaxed);
-        atomic_set(&self.0.shard.leaked_set, self.0.index, true, Ordering::Release);
+        atomic_set(
+            &self.0.shard.connected_set,
+            self.0.index,
+            false,
+            Ordering::Relaxed,
+        );
+        atomic_set(
+            &self.0.shard.leaked_set,
+            self.0.index,
+            true,
+            Ordering::Release,
+        );
 
         self.0.shard.leak_event.notify(usize::MAX.tag(self.0.index));
+    }
+
+    pub fn should_reconnect(&self) -> bool {
+        self.0.should_reconnect()
     }
 }
 
@@ -463,7 +493,11 @@ impl<T> SlotGuard<T> {
     fn should_reconnect(&self) -> bool {
         let min_connections = self.shard.global.shard_min_connections(self.shard.shard_id);
 
-        let num_connected = self.shard.connected_set.load(Ordering::Acquire).count_ones() as usize;
+        let num_connected = self
+            .shard
+            .connected_set
+            .load(Ordering::Acquire)
+            .count_ones() as usize;
 
         num_connected < min_connections
     }
@@ -641,6 +675,35 @@ fn current_thread_id() -> usize {
     }
 
     CURRENT_THREAD_ID.with(|i| *i)
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct Mask(usize);
+
+impl Mask {
+    pub fn count_ones(&self) -> usize {
+        self.0.count_ones() as usize
+    }
+}
+
+impl Iterator for Mask {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.0 == 0 {
+            return None;
+        }
+
+        let index = self.0.trailing_zeros() as usize;
+        self.0 &= 1 << index;
+
+        Some(index)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let count = self.0.count_ones() as usize;
+        (count, Some(count))
+    }
 }
 
 #[cfg(test)]

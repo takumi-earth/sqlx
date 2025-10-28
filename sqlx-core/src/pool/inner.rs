@@ -1,4 +1,4 @@
-use super::connection::{ConnectionInner};
+use super::connection::ConnectionInner;
 use crate::database::Database;
 use crate::error::Error;
 use crate::pool::{connection, CloseEvent, Pool, PoolConnection, PoolConnector, PoolOptions};
@@ -11,18 +11,20 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::task::{ready, Poll};
 
+use crate::connection::Connection;
 use crate::logger::private_level_filter_to_trace_level;
-use crate::pool::connect::{ConnectPermit, ConnectTask, ConnectTaskShared, ConnectionCounter, ConnectionId, DynConnector};
+use crate::pool::connect::{
+    ConnectPermit, ConnectTask, ConnectTaskShared, ConnectionCounter, ConnectionId, DynConnector,
+};
 use crate::pool::shard::{ConnectedSlot, DisconnectedSlot, Sharded};
 use crate::rt::JoinHandle;
 use crate::{private_tracing_dynamic_event, rt};
 use either::Either;
-use futures_util::future::{self, OptionFuture};
-use futures_util::FutureExt;
-use std::time::{Duration, Instant};
 use futures_core::FusedFuture;
+use futures_util::future::{self, OptionFuture};
+use futures_util::{stream, FutureExt, TryStreamExt};
+use std::time::{Duration, Instant};
 use tracing::Level;
-use crate::connection::Connection;
 
 pub(crate) struct PoolInner<DB: Database> {
     pub(super) connector: DynConnector<DB>,
@@ -48,13 +50,23 @@ impl<DB: Database> PoolInner<DB> {
                     return;
                 };
 
-                pool.connector.connect(Pool(pool.clone()), ConnectionId::next(), slot, ConnectTaskShared::new_arc());
+                pool.connector.connect(
+                    Pool(pool.clone()),
+                    ConnectionId::next(),
+                    slot,
+                    ConnectTaskShared::new_arc(),
+                );
             };
 
             Self {
                 connector: DynConnector::new(connector),
                 counter: ConnectionCounter::new(),
-                sharded: Sharded::new(options.max_connections, options.shards, options.min_connections, reconnect),
+                sharded: Sharded::new(
+                    options.max_connections,
+                    options.shards,
+                    options.min_connections,
+                    reconnect,
+                ),
                 is_closed: AtomicBool::new(false),
                 on_closed: event_listener::Event::new(),
                 acquire_time_level: private_level_filter_to_trace_level(options.acquire_time_level),
@@ -153,20 +165,33 @@ impl<DB: Database> PoolInner<DB> {
                     }
                     Err(slot) => {
                         if connect.is_terminated() {
-                            connect = self.connector
-                                .connect(Pool(self.clone()), ConnectionId::next(), slot, connect_shared.clone())
+                            connect = self
+                                .connector
+                                .connect(
+                                    Pool(self.clone()),
+                                    ConnectionId::next(),
+                                    slot,
+                                    connect_shared.clone(),
+                                )
                                 .fuse();
                         }
 
                         acquire_connected.set(self.acquire_connected().fuse());
+                        continue;
                     }
                 }
             }
 
             if let Poll::Ready(slot) = acquire_disconnected.as_mut().poll(cx) {
                 if connect.is_terminated() {
-                    connect = self.connector
-                        .connect(Pool(self.clone()), ConnectionId::next(), slot, connect_shared.clone())
+                    connect = self
+                        .connector
+                        .connect(
+                            Pool(self.clone()),
+                            ConnectionId::next(),
+                            slot,
+                            connect_shared.clone(),
+                        )
                         .fuse();
                 }
             }
@@ -176,7 +201,8 @@ impl<DB: Database> PoolInner<DB> {
             }
 
             return Poll::Pending;
-        }).await?;
+        })
+        .await?;
 
         let acquired_after = acquire_started_at.elapsed();
 
@@ -204,7 +230,9 @@ impl<DB: Database> PoolInner<DB> {
         Ok(acquired)
     }
 
-    async fn acquire_connected(self: &Arc<Self>) -> Result<PoolConnection<DB>, DisconnectedSlot<ConnectionInner<DB>>> {
+    async fn acquire_connected(
+        self: &Arc<Self>,
+    ) -> Result<PoolConnection<DB>, DisconnectedSlot<ConnectionInner<DB>>> {
         let connected = self.sharded.acquire_connected().await;
 
         tracing::debug!(
@@ -214,55 +242,42 @@ impl<DB: Database> PoolInner<DB> {
         );
 
         match finish_acquire(self, connected) {
-            Either::Left(task) => {
-                task.await
-            }
-            Either::Right(conn) => {
-                Ok(conn)
-            }
+            Either::Left(task) => task.await,
+            Either::Right(conn) => Ok(conn),
         }
     }
 
-    /// Try to maintain `min_connections`, returning any errors (including `PoolTimedOut`).
-    pub async fn try_min_connections(self: &Arc<Self>, deadline: Instant) -> Result<(), Error> {
-        rt::timeout_at(deadline, async {
-            while self.size() < self.options.min_connections {
-                // Don't wait for a connect permit.
-                //
-                // If no extra permits are available then we shouldn't be trying to spin up
-                // connections anyway.
-                let Some((id, permit)) = self.counter.try_acquire_permit(self) else {
-                    return Ok(());
-                };
+    pub(crate) async fn try_min_connections(self: &Arc<Self>) -> Result<(), Error> {
+        stream::iter(
+            self.sharded
+                .iter_min_connections()
+                .map(Result::<_, Error>::Ok),
+        )
+        .try_for_each_concurrent(None, |slot| async move {
+            let shared = ConnectTaskShared::new_arc();
 
-                let conn = self.connector.connect(id, permit).await?;
+            let res = self
+                .connector
+                .connect(
+                    Pool(self.clone()),
+                    ConnectionId::next(),
+                    slot,
+                    shared.clone(),
+                )
+                .await;
 
-                // We skip `after_release` since the connection was never provided to user code
-                // besides inside `PollConnector::connect()`, if they override it.
-                self.release(conn.into_floating());
+            match res {
+                Ok(conn) => {
+                    drop(conn);
+                    Ok(())
+                }
+                Err(Error::PoolTimedOut { .. }) => Err(Error::PoolTimedOut {
+                    last_connect_error: shared.take_error().map(Box::new),
+                }),
+                Err(other) => Err(other),
             }
-
-            Ok(())
         })
         .await
-        .unwrap_or_else(|_| Err(Error::PoolTimedOut))
-    }
-
-    /// Attempt to maintain `min_connections`, logging if unable.
-    pub async fn min_connections_maintenance(self: &Arc<Self>, deadline: Option<Instant>) {
-        let deadline = deadline.unwrap_or_else(|| {
-            // Arbitrary default deadline if the caller doesn't care.
-            Instant::now() + Duration::from_secs(300)
-        });
-
-        match self.try_min_connections(deadline).await {
-            Ok(()) => (),
-            Err(Error::PoolClosed) => (),
-            Err(Error::PoolTimedOut) => {
-                tracing::debug!("unable to complete `min_connections` maintenance before deadline")
-            }
-            Err(error) => tracing::debug!(%error, "error while maintaining min_connections"),
-        }
     }
 }
 
@@ -283,7 +298,10 @@ pub(super) fn is_beyond_max_lifetime<DB: Database>(
 }
 
 /// Returns `true` if the connection has exceeded `options.idle_timeout` if set, `false` otherwise.
-fn is_beyond_idle_timeout<DB: Database>(idle: &ConnectionInner<DB>, options: &PoolOptions<DB>) -> bool {
+fn is_beyond_idle_timeout<DB: Database>(
+    idle: &ConnectionInner<DB>,
+    options: &PoolOptions<DB>,
+) -> bool {
     options
         .idle_timeout
         .is_some_and(|timeout| idle.last_released_at.elapsed() > timeout)
@@ -359,7 +377,13 @@ fn spawn_maintenance_tasks<DB: Database>(pool: &Arc<PoolInner<DB>>) {
             if pool.options.min_connections > 0 {
                 rt::spawn(async move {
                     if let Some(pool) = pool_weak.upgrade() {
-                        pool.min_connections_maintenance(None).await;
+                        if let Err(error) = pool.try_min_connections().await {
+                            tracing::error!(
+                                target: "sqlx::pool",
+                                ?error,
+                                "error maintaining min_connections"
+                            );
+                        }
                     }
                 });
             }
@@ -384,25 +408,21 @@ fn spawn_maintenance_tasks<DB: Database>(pool: &Arc<PoolInner<DB>>) {
 
                     // Go over all idle connections, check for idleness and lifetime,
                     // and if we have fewer than min_connections after reaping a connection,
-                    // open a new one immediately. Note that other connections may be popped from
-                    // the queue in the meantime - that's fine, there is no harm in checking more
-                    for _ in 0..pool.num_idle() {
-                        if let Some(conn) = pool.try_acquire() {
-                            if is_beyond_idle_timeout(&conn, &pool.options)
-                                || is_beyond_max_lifetime(&conn, &pool.options)
-                            {
-                                let _ = conn.close().await;
-                                pool.min_connections_maintenance(Some(next_run)).await;
-                            } else {
-                                pool.release(conn.into_live());
-                            }
+                    // open a new one immediately.
+                    for conn in pool.sharded.iter_idle() {
+                        if is_beyond_idle_timeout(&conn, &pool.options)
+                            || is_beyond_max_lifetime(&conn, &pool.options)
+                        {
+                            // Dropping the slot will check if the connection needs to be
+                            // re-made.
+                            let _ = connection::close(conn).await;
                         }
                     }
 
                     // Don't hold a reference to the pool while sleeping.
                     drop(pool);
 
-                   rt::sleep_until(next_run).await;
+                    rt::sleep_until(next_run).await;
                 }
             })
             .await;

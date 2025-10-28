@@ -1,6 +1,6 @@
 use crate::connection::{ConnectOptions, Connection};
 use crate::database::Database;
-use crate::pool::connection::{ConnectionInner};
+use crate::pool::connection::ConnectionInner;
 use crate::pool::inner::PoolInner;
 use crate::pool::{Pool, PoolConnection};
 use crate::rt::JoinHandle;
@@ -14,18 +14,17 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::Instant;
 
-use crate::pool::shard::{DisconnectedSlot};
+use crate::pool::shard::DisconnectedSlot;
 #[cfg(doc)]
 use crate::pool::PoolOptions;
 use crate::sync::{AsyncMutex, AsyncMutexGuard};
+use ease_off::core::EaseOffCore;
 use std::io;
 use std::ops::ControlFlow;
 use std::pin::{pin, Pin};
-use std::task::{Context, Poll};
-use ease_off::core::EaseOffCore;
+use std::task::{ready, Context, Poll};
 
-const EASE_OFF: EaseOffCore = ease_off::Options::new()
-    .into_core();
+const EASE_OFF: EaseOffCore = ease_off::Options::new().into_core();
 
 /// Custom connect callback for [`Pool`][crate::pool::Pool].
 ///
@@ -336,7 +335,12 @@ pub struct PoolConnectMetadata {
 pub struct DynConnector<DB: Database> {
     // We want to spawn the connection attempt as a task anyway
     connect: Box<
-        dyn Fn(Pool<DB>, ConnectionId, DisconnectedSlot<ConnectionInner<DB>>, Arc<ConnectTaskShared>) -> ConnectTask<DB>
+        dyn Fn(
+                Pool<DB>,
+                ConnectionId,
+                DisconnectedSlot<ConnectionInner<DB>>,
+                Arc<ConnectTaskShared>,
+            ) -> ConnectTask<DB>
             + Send
             + Sync
             + 'static,
@@ -424,21 +428,14 @@ impl ConnectTaskShared {
     }
 
     pub fn take_error(&self) -> Option<Error> {
-        self.last_error.lock().unwrap_or_else(|e| e.into_inner()).take()
+        self.last_error
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .take()
     }
 
     fn put_error(&self, error: Error) {
         *self.last_error.lock().unwrap_or_else(|e| e.into_inner()) = Some(error);
-    }
-}
-
-/// Cancels the connection attempt on-drop, but only if it's in a backoff loop.
-///
-/// Repeatedly dialing and cancelling connection attempts can put a lot of unnecessary load on the
-/// server, so if we already have an attempt in-progress, we should see it through.
-impl<DB: Database> Drop for ConnectTask<DB> {
-    fn drop(&mut self) {
-        self.cancel();
     }
 }
 
@@ -633,10 +630,30 @@ async fn connect_with_backoff<DB: Database>(
             connection_id,
         };
 
-        match connector.connect_with_control_flow(meta).await {
+        tracing::trace!(
+            target: "sqlx::pool::connect",
+            %connection_id,
+            attempt,
+            elapsed_seconds=start.elapsed().as_secs_f64(),
+            "beginning connection attempt"
+        );
+
+        let res = connector.connect_with_control_flow(meta).await;
+
+        let now = Instant::now();
+        let elapsed = now.duration_since(start);
+        let elapsed_seconds = elapsed.as_secs_f64();
+
+        match res {
             ControlFlow::Break(Ok(conn)) => {
-                let now = Instant::now();
-                
+                tracing::trace!(
+                    target: "sqlx::pool::connect",
+                    %connection_id,
+                    attempt,
+                    elapsed_seconds,
+                    "connection established",
+                );
+
                 return Ok(PoolConnection::new(
                     slot.put(ConnectionInner {
                         raw: conn,
@@ -645,24 +662,26 @@ async fn connect_with_backoff<DB: Database>(
                         last_released_at: now,
                     }),
                     pool.0.clone(),
-                ))
+                ));
             }
             ControlFlow::Break(Err(e)) => {
                 tracing::warn!(
                     target: "sqlx::pool::connect",
                     %connection_id,
                     attempt,
+                    elapsed_seconds,
                     error=?e,
                     "error connecting to database",
                 );
 
-                return Err(e)
-            },
+                return Err(e);
+            }
             ControlFlow::Continue(e) => {
                 tracing::warn!(
                     target: "sqlx::pool::connect",
                     %connection_id,
                     attempt,
+                    elapsed_seconds,
                     error=?e,
                     "error connecting to database; retrying",
                 );
@@ -671,9 +690,8 @@ async fn connect_with_backoff<DB: Database>(
             }
         }
 
-        let now = Instant::now();
-
-        let wait = EASE_OFF.nth_retry_at(attempt, now, deadline, &mut rand::thread_rng())
+        let wait = EASE_OFF
+            .nth_retry_at(attempt, now, deadline, &mut rand::thread_rng())
             .map_err(|_| {
                 Error::PoolTimedOut {
                     // This should be populated by the caller
@@ -686,11 +704,28 @@ async fn connect_with_backoff<DB: Database>(
                 target: "sqlx::pool::connect",
                 %connection_id,
                 attempt,
+                elapsed_seconds,
                 "waiting for {:?}",
                 wait.duration_since(now),
             );
 
-            rt::sleep_until(wait).await;
+            let mut sleep = pin!(rt::sleep_until(wait));
+
+            std::future::poll_fn(|cx| {
+                if let Poll::Ready(()) = Pin::new(&mut closed).poll(cx) {
+                    return Poll::Ready(Err(Error::PoolClosed));
+                }
+
+                if let Poll::Ready(()) = Pin::new(&mut cancelled).poll(cx) {
+                    return Poll::Ready(Err(Error::PoolTimedOut {
+                        last_connect_error: None,
+                    }));
+                }
+
+                ready!(sleep.as_mut().poll(cx));
+                Poll::Ready(Ok(()))
+            })
+            .await?;
         }
     }
 

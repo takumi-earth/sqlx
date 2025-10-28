@@ -9,9 +9,10 @@ use crate::database::Database;
 use crate::error::Error;
 
 use super::inner::{is_beyond_max_lifetime, PoolInner};
-use crate::pool::connect::{ConnectPermit, ConnectionId};
+use crate::pool::connect::{ConnectPermit, ConnectTaskShared, ConnectionId};
 use crate::pool::options::PoolConnectionMetadata;
 use crate::pool::shard::{ConnectedSlot, DisconnectedSlot};
+use crate::pool::Pool;
 use crate::rt;
 
 const RETURN_TO_POOL_TIMEOUT: Duration = Duration::from_secs(5);
@@ -142,33 +143,26 @@ impl<DB: Database> PoolConnection<DB> {
         let pool = self.pool.clone();
 
         async move {
-            let returned_to_pool = if let Some(conn) = conn {
-                rt::timeout(RETURN_TO_POOL_TIMEOUT, return_to_pool(conn, &pool))
-                    .await
-                    .unwrap_or(false)
-            } else {
-                false
+            let Some(conn) = conn else {
+                return;
             };
 
-            if !returned_to_pool {
-                pool.min_connections_maintenance(None).await;
-            }
+            rt::timeout(RETURN_TO_POOL_TIMEOUT, return_to_pool(conn, &pool))
+                .await
+                // Dropping of the `slot` will check if the connection must be re-established
+                // but only after trying to pass it to a task that needs it.
+                .ok();
         }
     }
 
     fn take_and_close(&mut self) -> impl Future<Output = ()> + Send + 'static {
         let conn = self.conn.take();
-        let pool = self.pool.clone();
 
         async move {
             if let Some(conn) = conn {
                 // Don't hold the connection forever if it hangs while trying to close
-                rt::timeout(CLOSE_ON_DROP_TIMEOUT, close(conn))
-                    .await
-                    .ok();
+                rt::timeout(CLOSE_ON_DROP_TIMEOUT, close(conn)).await.ok();
             }
-
-            pool.min_connections_maintenance(None).await;
         }
     }
 }
@@ -228,29 +222,29 @@ impl<DB: Database> ConnectionInner<DB> {
     }
 }
 
-pub(crate) async fn close<DB: Database>(conn: ConnectedSlot<ConnectionInner<DB>>) -> (Result<(), Error>, DisconnectedSlot<ConnectionInner<DB>>) {
+pub(crate) async fn close<DB: Database>(
+    conn: ConnectedSlot<ConnectionInner<DB>>,
+) -> (Result<(), Error>, DisconnectedSlot<ConnectionInner<DB>>) {
     let connection_id = conn.id;
 
     tracing::debug!(target: "sqlx::pool", %connection_id, "closing connection (gracefully)");
 
     let (conn, slot) = ConnectedSlot::take(conn);
 
-    let res = conn.raw.close().await
-        .inspect_err(|error| {
-            tracing::debug!(
-                target: "sqlx::pool",
-                %connection_id,
-                %error,
-                "error occurred while closing the pool connection"
-            );
-        });
+    let res = conn.raw.close().await.inspect_err(|error| {
+        tracing::debug!(
+            target: "sqlx::pool",
+            %connection_id,
+            %error,
+            "error occurred while closing the pool connection"
+        );
+    });
 
-    (
-        res,
-        slot,
-    )
+    (res, slot)
 }
-pub(crate) async fn close_hard<DB: Database>(conn: ConnectedSlot<ConnectionInner<DB>>) -> (Result<(), Error>, DisconnectedSlot<ConnectionInner<DB>>) {
+pub(crate) async fn close_hard<DB: Database>(
+    conn: ConnectedSlot<ConnectionInner<DB>>,
+) -> (Result<(), Error>, DisconnectedSlot<ConnectionInner<DB>>) {
     let connection_id = conn.id;
 
     tracing::debug!(
@@ -261,37 +255,36 @@ pub(crate) async fn close_hard<DB: Database>(conn: ConnectedSlot<ConnectionInner
 
     let (conn, slot) = ConnectedSlot::take(conn);
 
-    let res = conn.raw.close_hard().await
-        .inspect_err(|error| {
-            tracing::debug!(
-                target: "sqlx::pool",
-                %connection_id,
-                %error,
-                "error occurred while closing the pool connection"
-            );
-        });
+    let res = conn.raw.close_hard().await.inspect_err(|error| {
+        tracing::debug!(
+            target: "sqlx::pool",
+            %connection_id,
+            %error,
+            "error occurred while closing the pool connection"
+        );
+    });
 
-    (
-        res,
-        slot,
-    )
+    (res, slot)
 }
 
 /// Return the connection to the pool.
 ///
 /// Returns `true` if the connection was successfully returned, `false` if it was closed.
-async fn return_to_pool<DB: Database>(mut conn: ConnectedSlot<ConnectionInner<DB>>, pool: &PoolInner<DB>) -> bool {
+async fn return_to_pool<DB: Database>(
+    mut conn: ConnectedSlot<ConnectionInner<DB>>,
+    pool: &PoolInner<DB>,
+) -> Result<(), DisconnectedSlot<ConnectionInner<DB>>> {
     // Immediately close the connection.
     if pool.is_closed() {
-        close(conn).await;
-        return false;
+        let (_res, slot) = close(conn).await;
+        return Err(slot);
     }
 
     // If the connection is beyond max lifetime, close the connection and
     // immediately create a new connection
     if is_beyond_max_lifetime(&conn, &pool.options) {
-        close(conn).await;
-        return false;
+        let (_res, slot) = close(conn).await;
+        return Err(slot);
     }
 
     if let Some(test) = &pool.options.after_release {
@@ -299,15 +292,15 @@ async fn return_to_pool<DB: Database>(mut conn: ConnectedSlot<ConnectionInner<DB
         match (test)(&mut conn.raw, meta).await {
             Ok(true) => (),
             Ok(false) => {
-                close(conn).await;
-                return false;
+                let (_res, slot) = close(conn).await;
+                return Err(slot);
             }
             Err(error) => {
                 tracing::warn!(%error, "error from `after_release`");
                 // Connection is broken, don't try to gracefully close as
                 // something weird might happen.
-                close_hard(conn).await;
-                return false;
+                let (_res, slot) = close_hard(conn).await;
+                return Err(slot);
             }
         }
     }
@@ -321,16 +314,16 @@ async fn return_to_pool<DB: Database>(mut conn: ConnectedSlot<ConnectionInner<DB
     // to recover from cancellations
     if let Err(error) = conn.raw.ping().await {
         tracing::warn!(
-                %error,
-                "error occurred while testing the connection on-release",
-            );
+            %error,
+            "error occurred while testing the connection on-release",
+        );
 
         // Connection is broken, don't try to gracefully close.
-        close_hard(conn).await;
-        false
+        let (_res, slot) = close_hard(conn).await;
+        Err(slot)
     } else {
         // if the connection is still viable, release it to the pool
         drop(conn);
-        true
+        Ok(())
     }
 }

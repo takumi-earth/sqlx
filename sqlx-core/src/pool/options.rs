@@ -1,16 +1,16 @@
 use crate::connection::Connection;
 use crate::database::Database;
 use crate::error::Error;
-use crate::pool::connect::{ConnectionId, DefaultConnector};
+use crate::pool::connect::{ConnectTaskShared, ConnectionId, DefaultConnector};
 use crate::pool::inner::PoolInner;
 use crate::pool::{Pool, PoolConnector};
 use futures_core::future::BoxFuture;
+use futures_util::{stream, TryStreamExt};
 use log::LevelFilter;
 use std::fmt::{self, Debug, Formatter};
 use std::num::NonZero;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use futures_util::{stream, TryStreamExt};
 
 /// Configuration options for [`Pool`][super::Pool].
 ///
@@ -573,13 +573,6 @@ impl<DB: Database> PoolOptions<DB> {
         let deadline = Instant::now() + self.acquire_timeout;
 
         let inner = PoolInner::new_arc(self, connector);
-
-        stream::iter(inner.sharded.acquire_min_connections())
-            .map(Result::<(), Error>::Ok)
-            .try_for_each_concurrent(None, |slot| {
-                inner.connector.connect(Pool(inner.clone()), ConnectionId::next(), slot)
-            })
-            .await?;
 
         Ok(Pool(inner))
     }
