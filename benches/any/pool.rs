@@ -45,6 +45,16 @@ fn bench_pool(c: &mut Criterion) {
             tasks: 16,
             pool_size: 20,
         },
+        Input {
+            threads: 16,
+            tasks: 32,
+            pool_size: 64,
+        },
+        Input {
+            threads: 16,
+            tasks: 128,
+            pool_size: 64,
+        },
     ];
 
     let mut group = c.benchmark_group("Bench Pool");
@@ -69,23 +79,22 @@ fn bench_pool_with(b: &mut Bencher, input: &Input, database_url: &str) {
         AnyPoolOptions::new()
             .min_connections(input.pool_size)
             .max_connections(input.pool_size)
+            .test_before_acquire(false)
             .connect(database_url)
             .await
             .expect("error connecting to pool")
     });
 
-    for _ in 0..input.tasks {
+    for _ in 1..=input.tasks {
         let pool = pool.clone();
 
-        runtime.spawn(async move {
-            loop {
-                let _ = pool.acquire().await;
-            }
-        });
+        runtime.spawn(async move { while pool.acquire().await.is_ok() {} });
     }
 
     b.to_async(&runtime)
         .iter(|| async { pool.acquire().await.expect("failed to acquire connection") });
+
+    drop(pool.close());
 }
 
 criterion_group!(benches, bench_pool,);
