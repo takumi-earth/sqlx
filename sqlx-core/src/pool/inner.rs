@@ -176,6 +176,7 @@ impl<DB: Database> PoolInner<DB> {
                                 .fuse();
                         }
 
+                        // Try to acquire another connected connection.
                         acquire_connected.set(self.acquire_connected().fuse());
                         continue;
                     }

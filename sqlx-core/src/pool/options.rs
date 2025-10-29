@@ -632,7 +632,7 @@ fn default_shards() -> NonZero<usize> {
     #[cfg(feature = "_rt-async-std")]
     if let Some(val) = std::env::var("ASYNC_STD_THREAD_COUNT")
         .ok()
-        .and_then(|s| s.parse())
+        .and_then(|s| s.parse().ok())
     {
         return val;
     }
