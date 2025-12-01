@@ -200,12 +200,10 @@ where
         None => None,
     };
 
-    if let Some(num) = num_parameters {
-        if num != input.arg_exprs.len() {
-            return Err(
-                format!("expected {} parameters, got {}", num, input.arg_exprs.len()).into(),
-            );
-        }
+    if let Some(num) = num_parameters
+        && num != input.arg_exprs.len()
+    {
+        return Err(format!("expected {} parameters, got {}", num, input.arg_exprs.len()).into());
     }
 
     let mut warnings = Warnings::default();

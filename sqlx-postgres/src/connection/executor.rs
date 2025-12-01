@@ -193,16 +193,16 @@ impl PgConnection {
         )
         .await?;
 
-        if persistent && self.inner.cache_statement.is_enabled() {
-            if let Some((id, _)) = self.inner.cache_statement.insert(sql, statement.clone()) {
-                self.inner.stream.write_msg(Close::Statement(id))?;
-                self.write_sync();
+        if persistent && self.inner.cache_statement.is_enabled()
+            && let Some((id, _)) = self.inner.cache_statement.insert(sql, statement.clone())
+        {
+            self.inner.stream.write_msg(Close::Statement(id))?;
+            self.write_sync();
 
-                self.inner.stream.flush().await?;
+            self.inner.stream.flush().await?;
 
-                self.wait_for_close_complete(1).await?;
-                self.recv_ready_for_query().await?;
-            }
+            self.wait_for_close_complete(1).await?;
+            self.recv_ready_for_query().await?;
         }
 
         Ok(statement)

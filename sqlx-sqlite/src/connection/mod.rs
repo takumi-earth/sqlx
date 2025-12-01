@@ -226,11 +226,11 @@ impl Connection for SqliteConnection {
             pragma_string.push_str("PRAGMA optimize;");
             self.execute(AssertSqlSafe(pragma_string)).await?;
         }
-        let shutdown = self.worker.shutdown();
-        // Drop the statement worker, which should
-        // cover all references to the connection handle outside of the worker thread
-        drop(self);
-        // Ensure the worker thread has terminated
+        let shutdown = {
+            let worker = &mut self.worker;
+            worker.shutdown()
+        };
+        // Ensure the worker thread has terminated before dropping the connection
         shutdown.await
     }
 

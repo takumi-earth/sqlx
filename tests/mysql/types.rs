@@ -31,12 +31,12 @@ test_type!(i32(MySql, "2141512" == 2141512_i32));
 test_type!(u64(MySql, "CAST(2141512 AS UNSIGNED)" == 2141512_u64));
 test_type!(i64(MySql, "2141512" == 2141512_i64));
 
-test_type!(f64(MySql, "3.14159265e0" == 3.14159265_f64));
+test_type!(f64(MySql, "3.14159265e0" == std::f64::consts::PI));
 
 // NOTE: This behavior can be very surprising. MySQL implicitly widens FLOAT bind parameters
 //       to DOUBLE. This results in the weirdness you see below. MySQL generally recommends to stay
 //       away from FLOATs.
-test_type!(f32(MySql, "3.1410000324249268e0" == 3.141f32 as f64 as f32));
+test_type!(f32(MySql, "3.1410000324249268e0" == std::f32::consts::PI));
 
 test_type!(string<String>(MySql,
     "'helloworld'" == "helloworld",

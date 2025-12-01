@@ -66,8 +66,10 @@ impl SqliteValue {
         column_type: Option<SqliteTypeInfo>,
     ) -> Self {
         debug_assert!(!value.is_null());
-        let handle = ValueHandle::try_dup_of(value, column_type)
-            .expect("SQLite failed to allocate memory for duplicated value");
+        let handle = unsafe {
+            ValueHandle::try_dup_of(value, column_type)
+                .expect("SQLite failed to allocate memory for duplicated value")
+        };
         Self(handle)
     }
 
@@ -146,7 +148,7 @@ impl<'r> SqliteValueRef<'r> {
     #[allow(unused)]
     pub(crate) unsafe fn borrowed(value: *mut sqlite3_value) -> Self {
         debug_assert!(!value.is_null());
-        let handle = ValueHandle::temporary(NonNull::new_unchecked(value));
+        let handle = ValueHandle::temporary(unsafe { NonNull::new_unchecked(value) });
         Self(Cow::Owned(handle))
     }
 
@@ -411,6 +413,6 @@ impl Blob {
     /// # Safety
     /// `'a` must not outlive the `sqlite3_value` this blob came from.
     unsafe fn as_slice<'a>(&self) -> &'a [u8] {
-        slice::from_raw_parts(self.ptr, self.len)
+        unsafe { slice::from_raw_parts(self.ptr, self.len) }
     }
 }

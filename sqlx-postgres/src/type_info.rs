@@ -987,7 +987,7 @@ impl PgType {
                 PgTypeKind::Pseudo => None,
                 PgTypeKind::Domain(_) => None,
                 PgTypeKind::Composite(_) => None,
-                PgTypeKind::Array(ref elem_type_info) => Some(Cow::Borrowed(elem_type_info)),
+                PgTypeKind::Array(elem_type_info) => Some(Cow::Borrowed(elem_type_info)),
                 PgTypeKind::Enum(_) => None,
                 PgTypeKind::Range(_) => None,
             },

@@ -230,14 +230,13 @@ where
 
         let res = test_fn(test_context.pool_opts, test_context.connect_opts).await;
 
-        if res.is_success() {
-            if let Err(e) = DB::cleanup_test(&DB::db_name(&args)).await {
+        if res.is_success()
+            && let Err(e) = DB::cleanup_test(&DB::db_name(&args)).await {
                 eprintln!(
                     "failed to delete database {:?}: {}",
                     test_context.db_name, e
                 );
             }
-        }
 
         res
     })

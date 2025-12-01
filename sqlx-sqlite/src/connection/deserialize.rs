@@ -181,8 +181,8 @@ impl SqliteOwnedBuf {
     /// # Safety
     /// The allocated buffer is uninitialized.
     unsafe fn with_capacity(size: usize) -> Option<SqliteOwnedBuf> {
-        let ptr = sqlite3_malloc64(u64::try_from(size).unwrap()).cast::<u8>();
-        Self::from_raw(ptr, size)
+        let ptr = unsafe { sqlite3_malloc64(u64::try_from(size).unwrap()).cast::<u8>() };
+        unsafe { Self::from_raw(ptr, size) }
     }
 
     /// Creates a new mem buffer from a pointer that has been created with sqlite_malloc

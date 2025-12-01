@@ -23,3 +23,22 @@ impl FrontendMessage for Flush {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::message::Encode;
+
+    #[test]
+    fn encodes_flush_message() {
+        let mut buf = Vec::new();
+        Flush.encode(&mut buf).expect("encode flush");
+        // Format byte + length (4) with zero body.
+        assert_eq!(buf, vec![FrontendMessageFormat::Flush as u8, 0, 0, 0, 4]);
+    }
+
+    #[test]
+    fn format_matches_enum() {
+        assert_eq!(Flush::FORMAT as u8, FrontendMessageFormat::Flush as u8);
+    }
+}

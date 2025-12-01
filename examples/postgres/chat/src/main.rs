@@ -3,10 +3,10 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use ratatui::text::Line;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Direction, Layout},
+    text::Line,
     style::{Color, Modifier, Style},
     text::{Span, Text},
     widgets::{Block, Borders, List, ListItem, Paragraph},
@@ -38,7 +38,10 @@ impl ChatApp {
         mut self,
         terminal: &mut Terminal<B>,
         mut listener: PgListener,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), Box<dyn Error + Send + Sync + 'static>>
+    where
+        <B as Backend>::Error: std::error::Error + Send + Sync + 'static,
+    {
         // setup listener task
         let messages = self.messages.clone();
         tokio::spawn(async move {
@@ -98,7 +101,7 @@ impl ChatApp {
                 ]
                 .as_ref(),
             )
-            .split(frame.size());
+            .split(frame.area());
 
         let text = Text::from(Line::from(vec![
             Span::raw("Press "),
@@ -114,12 +117,12 @@ impl ChatApp {
             .style(Style::default().fg(Color::Yellow))
             .block(Block::default().borders(Borders::ALL).title("Input"));
         frame.render_widget(input, chunks[1]);
-        frame.set_cursor(
+        frame.set_cursor_position((
             // Put cursor past the end of the input text
             chunks[1].x + self.input.width() as u16 + 1,
             // Move one line down, from the border to the input line
             chunks[1].y + 1,
-        );
+        ));
 
         let messages =
             List::new(messages).block(Block::default().borders(Borders::ALL).title("Messages"));

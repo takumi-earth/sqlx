@@ -34,7 +34,9 @@ impl Collation {
         F: Fn(&str, &str) -> Ordering + Send + Sync + 'static,
     {
         unsafe extern "C" fn drop_arc_value<T>(p: *mut c_void) {
-            drop(Arc::from_raw(p as *mut T));
+            unsafe {
+                drop(Arc::from_raw(p as *mut T));
+            }
         }
 
         Collation {
@@ -65,7 +67,7 @@ impl Collation {
             Ok(())
         } else {
             // The xDestroy callback is not called if the sqlite3_create_collation_v2() function fails.
-            drop(unsafe { Arc::from_raw(raw_f) });
+            unsafe { drop(Arc::from_raw(raw_f)) };
             Err(handle.expect_error().into())
         }
     }
@@ -88,7 +90,9 @@ where
     F: Fn(&str, &str) -> Ordering + Send + Sync + 'static,
 {
     unsafe extern "C" fn free_boxed_value<T>(p: *mut c_void) {
-        drop(Box::from_raw(p as *mut T));
+        unsafe {
+            drop(Box::from_raw(p as *mut T));
+        }
     }
 
     let boxed_f: *mut F = Box::into_raw(Box::new(compare));
@@ -110,7 +114,7 @@ where
         Ok(())
     } else {
         // The xDestroy callback is not called if the sqlite3_create_collation_v2() function fails.
-        drop(unsafe { Box::from_raw(boxed_f) });
+        unsafe { drop(Box::from_raw(boxed_f)) };
         Err(handle.expect_error().into())
     }
 }
@@ -137,15 +141,15 @@ where
     let right_len = usize::try_from(right_len)
         .unwrap_or_else(|_| panic!("right_len out of range: {right_len}"));
 
-    let s1 = {
+    let s1 = unsafe {
         let c_slice = slice::from_raw_parts(left_ptr as *const u8, left_len);
         from_utf8_unchecked(c_slice)
     };
-    let s2 = {
+    let s2 = unsafe {
         let c_slice = slice::from_raw_parts(right_ptr as *const u8, right_len);
         from_utf8_unchecked(c_slice)
     };
-    let t = (*boxed_f)(s1, s2);
+    let t = unsafe { (*boxed_f)(s1, s2) };
 
     match t {
         Ordering::Less => -1,

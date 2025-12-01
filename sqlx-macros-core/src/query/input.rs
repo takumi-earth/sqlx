@@ -27,7 +27,7 @@ enum QuerySrc {
 }
 
 pub enum RecordType {
-    Given(Type),
+    Given(Box<Type>),
     Scalar,
     Generated,
 }

@@ -190,14 +190,12 @@ impl ConnectionWorker {
                                     let mut rows_returned = 0;
 
                                     while let Some(res) = iter.next() {
-                                        if let Ok(ok) = &res {
-                                            if ok.is_right() {
-                                                rows_returned += 1;
-                                                if rows_returned >= limit {
-                                                    drop(iter);
-                                                    let _ = tx.send(res);
-                                                    break;
-                                                }
+                                        if let Ok(ok) = &res && ok.is_right() {
+                                            rows_returned += 1;
+                                            if rows_returned >= limit {
+                                                drop(iter);
+                                                let _ = tx.send(res);
+                                                break;
                                             }
                                         }
                                         let has_error = res.is_err();
@@ -302,14 +300,15 @@ impl ConnectionWorker {
 
                             let res_ok = res.is_ok();
 
-                            if let Some(tx) = tx {
-                                if tx.blocking_send(res).is_err() && res_ok {
-                                    // The ROLLBACK was processed but not acknowledged. This means
-                                    // that the `Transaction` doesn't know it was rolled back and
-                                    // will try to rollback again on drop. We need to ignore that
-                                    // rollback.
-                                    ignore_next_start_rollback = true;
-                                }
+                            if let Some(tx) = tx
+                                && tx.blocking_send(res).is_err()
+                                && res_ok
+                            {
+                                // The ROLLBACK was processed but not acknowledged. This means
+                                // that the `Transaction` doesn't know it was rolled back and
+                                // will try to rollback again on drop. We need to ignore that
+                                // rollback.
+                                ignore_next_start_rollback = true;
                             }
                         }
                         #[cfg(feature = "deserialize")]

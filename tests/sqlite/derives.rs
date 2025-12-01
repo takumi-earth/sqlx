@@ -3,6 +3,7 @@ use sqlx_test::test_type;
 
 #[derive(Debug, PartialEq, sqlx::Type)]
 #[repr(u32)]
+#[sqlx(no_pg_array)]
 enum Origin {
     Foo = 1,
     Bar = 2,

@@ -2,7 +2,8 @@ use accounts::AccountsManager;
 use color_eyre::eyre;
 use color_eyre::eyre::{Context, OptionExt};
 use payments::PaymentsManager;
-use rand::distributions::{Alphanumeric, DistString};
+use rand::distr::{Alphanumeric, SampleString};
+use rand::rng;
 use sqlx::Connection;
 
 #[tokio::main]
@@ -42,7 +43,7 @@ async fn main() -> eyre::Result<()> {
 
     // POST /account
     let user_email = format!("user{}@example.com", rand::random::<u32>());
-    let user_password = Alphanumeric.sample_string(&mut rand::thread_rng(), 16);
+    let user_password = Alphanumeric.sample_string(&mut rng(), 16);
 
     // Requires an externally managed transaction in case any application-specific records
     // should be created after the actual account record.

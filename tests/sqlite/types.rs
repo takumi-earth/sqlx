@@ -24,7 +24,7 @@ test_type!(i64(Sqlite, "9358295312" == 9358295312_i64));
 
 // NOTE: This behavior can be surprising. Floating-point parameters are widening to double which can
 //       result in strange rounding.
-test_type!(f32(Sqlite, "3.1410000324249268" == 3.141f32 as f64 as f32));
+test_type!(f32(Sqlite, "3.1410000324249268" == std::f32::consts::PI));
 
 test_type!(f64(Sqlite, "939399419.1225182" == 939399419.1225182_f64));
 
@@ -116,7 +116,7 @@ mod chrono {
     ));
 
     test_type!(chrono_date_time_fixed_offset<DateTime::<FixedOffset>>(Sqlite, "SELECT datetime({0}) is datetime(?), {0}, ?",
-        "'2016-11-08T03:50:23-05:00'" == DateTime::<Utc>::from(FixedOffset::west_opt(5 * 3600).unwrap().with_ymd_and_hms(2016, 11, 08, 3, 50, 23).unwrap())
+        "'2016-11-08T03:50:23-05:00'" == DateTime::<Utc>::from(FixedOffset::west_opt(5 * 3600).unwrap().with_ymd_and_hms(2016, 11, 8, 3, 50, 23).unwrap())
     ));
 }
 

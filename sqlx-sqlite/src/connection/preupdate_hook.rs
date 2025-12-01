@@ -119,9 +119,9 @@ impl<'a> PreupdateHookResult<'a> {
         p_value: *mut sqlite3_value,
     ) -> Result<SqliteValueRef<'a>, PreupdateError> {
         if ret != SQLITE_OK {
-            return Err(PreupdateError::Database(SqliteError::new(self.db)));
+            return Err(PreupdateError::Database(unsafe { SqliteError::new(self.db) }));
         }
-        Ok(SqliteValueRef::borrowed(p_value))
+        Ok(unsafe { SqliteValueRef::borrowed(p_value) })
     }
 }
 

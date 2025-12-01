@@ -58,6 +58,10 @@ pub use startup::Startup;
 pub use sync::Sync;
 pub use terminate::Terminate;
 
+// Keep Flush from triggering dead_code warnings in consumer builds.
+const _: FrontendMessageFormat = FrontendMessageFormat::Flush;
+const _: Flush = Flush;
+
 // Note: we can't use the same enum for both frontend and backend message formats
 // because there are duplicated format codes between them.
 //

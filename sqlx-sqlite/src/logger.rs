@@ -264,10 +264,10 @@ impl<R: Debug, S: Debug + DebugDiff, P: Debug> core::fmt::Display for QueryPlanL
             )?;
 
             let mut instruction_list: Vec<(BranchParent, &InstructionHistory<S>)> = Vec::new();
-            if let Some(parent) = self.branch_origins.get(&branch_id) {
-                if let Some(parent_state) = all_states.get(parent) {
-                    instruction_list.push((*parent, parent_state));
-                }
+            if let Some(parent) = self.branch_origins.get(&branch_id)
+                && let Some(parent_state) = all_states.get(parent)
+            {
+                instruction_list.push((*parent, parent_state));
             }
             if let Some(instructions) = self.branch_operations.get(&branch_id) {
                 for instruction in instructions.iter_entries() {

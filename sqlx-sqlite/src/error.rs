@@ -23,7 +23,7 @@ pub struct SqliteError {
 
 impl SqliteError {
     pub(crate) unsafe fn new(handle: *mut sqlite3) -> Self {
-        Self::try_new(handle).expect("There should be an error")
+        unsafe { Self::try_new(handle) }.expect("There should be an error")
     }
 
     pub(crate) unsafe fn try_new(handle: *mut sqlite3) -> Option<Self> {

@@ -36,10 +36,10 @@ impl<T: Clone> MtimeCache<T> {
             locked
         });
 
-        if let Some(inner) = &*inner {
-            if !inner.builder.any_modified() {
-                return Ok(inner.cached.clone());
-            }
+        if let Some(inner) = &*inner
+            && !inner.builder.any_modified()
+        {
+            return Ok(inner.cached.clone());
         }
 
         let mut builder = MtimeCacheBuilder::new();

@@ -69,10 +69,10 @@ pub(crate) fn describe(
 
                 let mut ty = stmt.handle.column_type_info(col);
 
-                if ty.0 == DataType::Null {
-                    if let Some(fallback) = fallback.get(col).cloned() {
-                        ty = fallback;
-                    }
+                if ty.0 == DataType::Null
+                    && let Some(fallback) = fallback.get(col).cloned()
+                {
+                    ty = fallback;
                 }
 
                 ty

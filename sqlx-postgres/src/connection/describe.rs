@@ -627,7 +627,7 @@ WHERE rngtypid = $1
         if let Some(Explain::Plan {
             plan:
                 plan @ Plan {
-                    output: Some(ref outputs),
+                    output: Some(outputs),
                     ..
                 },
         }) = explains.first()
@@ -656,11 +656,11 @@ fn visit_plan(plan: &Plan, outputs: &[String], nullables: &mut Vec<Option<bool>>
         }
     }
 
-    if let Some(plans) = &plan.plans {
-        if let Some("Left") | Some("Right") = plan.join_type.as_deref() {
-            for plan in plans {
-                visit_plan(plan, outputs, nullables);
-            }
+    if let Some(plans) = &plan.plans
+        && let Some("Left") | Some("Right") = plan.join_type.as_deref()
+    {
+        for plan in plans {
+            visit_plan(plan, outputs, nullables);
         }
     }
 }

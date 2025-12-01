@@ -68,7 +68,7 @@ enum ColumnNullabilityOverride {
 }
 
 enum ColumnTypeOverride {
-    Exact(Type),
+    Exact(Box<Type>),
     Wildcard,
     None,
 }
@@ -185,7 +185,7 @@ pub fn quote_query_as<DB: DatabaseExt>(
     let row_path = DB::row_path();
 
     // if this query came from a file, use `include_str!()` to tell the compiler where it came from
-    let sql = if let Some(ref path) = &input.file_path {
+    let sql = if let Some(path) = &input.file_path {
         quote::quote_spanned! { input.src_span => include_str!(#path) }
     } else {
         let sql = &input.sql;
@@ -248,10 +248,10 @@ fn get_column_type<DB: DatabaseExt>(
     i: usize,
     column: &DB::Column,
 ) -> TokenStream {
-    if let ColumnOrigin::Table(origin) = column.origin() {
-        if let Some(column_override) = config.macros.column_override(&origin.table, &origin.name) {
-            return column_override.parse().unwrap();
-        }
+    if let ColumnOrigin::Table(origin) = column.origin()
+        && let Some(column_override) = config.macros.column_override(&origin.table, &origin.name)
+    {
+        return column_override.parse().unwrap();
     }
 
     let type_info = column.type_info();
@@ -394,7 +394,7 @@ impl Parse for ColumnOverride {
             if let Type::Infer(_) = ty {
                 ColumnTypeOverride::Wildcard
             } else {
-                ColumnTypeOverride::Exact(ty)
+                ColumnTypeOverride::Exact(Box::new(ty))
             }
         } else {
             ColumnTypeOverride::None

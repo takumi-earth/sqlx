@@ -187,6 +187,7 @@ async fn test_derive_weak_enum() -> anyhow::Result<()> {
 
     #[derive(sqlx::Type, Debug, PartialEq, Eq)]
     #[repr(u16)]
+    #[sqlx(no_pg_array)]
     enum WeakEnumU16 {
         Foo = 0,
         Bar = 1,
@@ -195,6 +196,7 @@ async fn test_derive_weak_enum() -> anyhow::Result<()> {
 
     #[derive(sqlx::Type, Debug, PartialEq, Eq)]
     #[repr(u32)]
+    #[sqlx(no_pg_array)]
     enum WeakEnumU32 {
         Foo = 0,
         Bar = 1,
@@ -203,6 +205,7 @@ async fn test_derive_weak_enum() -> anyhow::Result<()> {
 
     #[derive(sqlx::Type, Debug, PartialEq, Eq)]
     #[repr(u64)]
+    #[sqlx(no_pg_array)]
     enum WeakEnumU64 {
         Foo = 0,
         Bar = 1,
