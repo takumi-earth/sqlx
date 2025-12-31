@@ -55,41 +55,35 @@ _unstable-docs = [
 ]
 
 [dependencies.libsqlite3-sys]
-# See `sqlx-sqlite/src/lib.rs` for details.
-version = ">=0.30.0, <0.36.0"
-default-features = false
-features = [
-    "pkg-config",
-    "vcpkg",
-]
+workspace = true
 
 [dependencies]
-futures-core = { version = "0.3.19", default-features = false }
-futures-channel = { version = "0.3.19", default-features = false, features = ["sink", "alloc", "std"] }
+futures-core = { workspace = true }
+futures-channel = { workspace = true }
 # used by the SQLite worker thread to block on the async mutex that locks the database handle
-futures-executor = { version = "0.3.19" }
-futures-intrusive = "0.5.0"
-futures-util = { version = "0.3.19", default-features = false, features = ["alloc", "sink"] }
+futures-executor = { workspace = true }
+futures-intrusive = { workspace = true }
+futures-util = { workspace = true }
 
 chrono = { workspace = true, optional = true }
 time = { workspace = true, optional = true }
 uuid = { workspace = true, optional = true }
 
-url = { version = "2.2.2" }
-percent-encoding = "2.1.0"
-serde_urlencoded = "0.7"
+url = { workspace = true }
+percent-encoding = { workspace = true }
+serde_urlencoded = { workspace = true }
 
-flume = { version = "0.11.0", default-features = false, features = ["async"] }
+flume = { workspace = true }
 
-atoi = "2.0"
+atoi = { workspace = true }
 
-log = "0.4.18"
-tracing = { version = "0.1.37", features = ["log"] }
+log = { workspace = true }
+tracing = { workspace = true }
 
-thiserror.workspace = true
+thiserror = { workspace = true }
 
-serde = { version = "1.0.145", features = ["derive"], optional = true }
-regex = { version = "1.5.5", optional = true }
+serde = { workspace = true, optional = true }
+regex = { workspace = true, optional = true }
 
 [dependencies.sqlx-core]
 workspace = true

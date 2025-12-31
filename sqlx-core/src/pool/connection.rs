@@ -10,7 +10,7 @@ use crate::connection::Connection;
 use crate::database::Database;
 use crate::error::Error;
 
-use super::inner::{is_beyond_max_lifetime, DecrementSizeGuard, PoolInner};
+use super::inner::{DecrementSizeGuard, PoolInner, is_beyond_max_lifetime};
 use crate::pool::options::PoolConnectionMetadata;
 
 const CLOSE_ON_DROP_TIMEOUT: Duration = Duration::from_secs(5);

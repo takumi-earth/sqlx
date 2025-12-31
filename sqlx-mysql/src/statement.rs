@@ -1,8 +1,8 @@
 use super::MySqlColumn;
+use crate::HashMap;
 use crate::column::ColumnIndex;
 use crate::error::Error;
 use crate::ext::ustr::UStr;
-use crate::HashMap;
 use crate::{MySql, MySqlArguments, MySqlTypeInfo};
 use either::Either;
 use sqlx_core::sql_str::SqlStr;

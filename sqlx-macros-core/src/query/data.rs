@@ -7,9 +7,9 @@ use std::sync::{Arc, LazyLock, Mutex};
 
 use serde::{Serialize, Serializer};
 
+use sqlx_core::HashMap;
 use sqlx_core::database::Database;
 use sqlx_core::describe::Describe;
-use sqlx_core::HashMap;
 
 use crate::database::DatabaseExt;
 use crate::query::cache::MtimeCache;

@@ -49,10 +49,10 @@ pub fn maybe_apply_dotenv() {
         return;
     }
 
-    if let Err(e) = dotenvy::dotenv() {
-        if !e.not_found() {
-            eprintln!("Warning: error loading `.env` file: {e:?}");
-        }
+    if let Err(e) = dotenvy::dotenv()
+        && !e.not_found()
+    {
+        eprintln!("Warning: error loading `.env` file: {e:?}");
     }
 }
 

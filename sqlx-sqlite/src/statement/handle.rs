@@ -1,11 +1,12 @@
-use std::ffi::c_void;
 use std::ffi::CStr;
+use std::ffi::c_void;
 
 use crate::error::{BoxDynError, Error};
 use crate::type_info::DataType;
 use crate::{SqliteError, SqliteTypeInfo};
 use libsqlite3_sys::{
-    sqlite3, sqlite3_bind_blob64, sqlite3_bind_double, sqlite3_bind_int, sqlite3_bind_int64,
+    SQLITE_DONE, SQLITE_MISUSE, SQLITE_OK, SQLITE_ROW, SQLITE_TRANSIENT, SQLITE_UTF8, sqlite3,
+    sqlite3_bind_blob64, sqlite3_bind_double, sqlite3_bind_int, sqlite3_bind_int64,
     sqlite3_bind_null, sqlite3_bind_parameter_count, sqlite3_bind_parameter_name,
     sqlite3_bind_text64, sqlite3_changes, sqlite3_clear_bindings, sqlite3_column_blob,
     sqlite3_column_bytes, sqlite3_column_count, sqlite3_column_database_name,
@@ -13,8 +14,7 @@ use libsqlite3_sys::{
     sqlite3_column_name, sqlite3_column_origin_name, sqlite3_column_table_name,
     sqlite3_column_type, sqlite3_column_value, sqlite3_db_handle, sqlite3_finalize, sqlite3_reset,
     sqlite3_sql, sqlite3_step, sqlite3_stmt, sqlite3_stmt_readonly, sqlite3_table_column_metadata,
-    sqlite3_value, SQLITE_DONE, SQLITE_MISUSE, SQLITE_OK, SQLITE_ROW, SQLITE_TRANSIENT,
-    SQLITE_UTF8,
+    sqlite3_value,
 };
 use sqlx_core::column::{ColumnOrigin, TableColumn};
 use std::os::raw::{c_char, c_int};
@@ -63,7 +63,8 @@ impl StatementHandle {
     pub(super) unsafe fn db_handle(&self) -> *mut sqlite3 {
         // O(c) access to the connection handle for this statement handle
         // https://sqlite.org/c3ref/db_handle.html
-        sqlite3_db_handle(self.0.as_ptr())
+        // SAFETY: self.0 is a valid statement handle
+        unsafe { sqlite3_db_handle(self.0.as_ptr()) }
     }
 
     pub(crate) fn read_only(&self) -> bool {

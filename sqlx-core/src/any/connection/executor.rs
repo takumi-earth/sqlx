@@ -6,7 +6,7 @@ use crate::sql_str::SqlStr;
 use either::Either;
 use futures_core::future::BoxFuture;
 use futures_core::stream::BoxStream;
-use futures_util::{stream, FutureExt, StreamExt};
+use futures_util::{FutureExt, StreamExt, stream};
 use std::future;
 
 impl<'c> Executor<'c> for &'c mut AnyConnection {

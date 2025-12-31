@@ -1,9 +1,9 @@
 use crate::config::Config;
 use crate::opt::{AddMigrationOpts, ConnectOpts, MigrationSourceOpt};
-use anyhow::{bail, Context};
+use anyhow::{Context, bail};
 use console::style;
-use sqlx::migrate::{AppliedMigration, Migrate, MigrateError, MigrationType, Migrator};
 use sqlx::Connection;
+use sqlx::migrate::{AppliedMigration, Migrate, MigrateError, MigrationType, Migrator};
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
@@ -223,10 +223,10 @@ pub async fn run(
 ) -> anyhow::Result<()> {
     let migrator = migration_source.resolve(config).await?;
 
-    if let Some(target_version) = target_version {
-        if !migrator.version_exists(target_version) {
-            bail!(MigrateError::VersionNotPresent(target_version));
-        }
+    if let Some(target_version) = target_version
+        && !migrator.version_exists(target_version)
+    {
+        bail!(MigrateError::VersionNotPresent(target_version));
     }
 
     let mut conn = crate::connect(config, connect_opts).await?;
@@ -253,10 +253,10 @@ pub async fn run(
         .max_by(|x, y| x.version.cmp(&y.version))
         .map(|migration| migration.version)
         .unwrap_or(0);
-    if let Some(target_version) = target_version {
-        if target_version < latest_version {
-            bail!(MigrateError::VersionTooOld(target_version, latest_version));
-        }
+    if let Some(target_version) = target_version
+        && target_version < latest_version
+    {
+        bail!(MigrateError::VersionTooOld(target_version, latest_version));
     }
 
     let applied_migrations: HashMap<_, _> = applied_migrations
@@ -325,10 +325,11 @@ pub async fn revert(
 ) -> anyhow::Result<()> {
     let migrator = migration_source.resolve(config).await?;
 
-    if let Some(target_version) = target_version {
-        if target_version != 0 && !migrator.version_exists(target_version) {
-            bail!(MigrateError::VersionNotPresent(target_version));
-        }
+    if let Some(target_version) = target_version
+        && target_version != 0
+        && !migrator.version_exists(target_version)
+    {
+        bail!(MigrateError::VersionNotPresent(target_version));
     }
 
     let mut conn = crate::connect(config, connect_opts).await?;
@@ -356,10 +357,10 @@ pub async fn revert(
         .max_by(|x, y| x.version.cmp(&y.version))
         .map(|migration| migration.version)
         .unwrap_or(0);
-    if let Some(target_version) = target_version {
-        if target_version > latest_version {
-            bail!(MigrateError::VersionTooNew(target_version, latest_version));
-        }
+    if let Some(target_version) = target_version
+        && target_version > latest_version
+    {
+        bail!(MigrateError::VersionTooNew(target_version, latest_version));
     }
 
     let applied_migrations: HashMap<_, _> = applied_migrations

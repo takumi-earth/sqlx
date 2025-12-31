@@ -9,6 +9,7 @@ compile_error!(
     "sqlite-preupdate-hook requires either 'sqlite' or 'sqlite-unbundled' to be enabled"
 );
 
+pub use sqlx_core::Either;
 pub use sqlx_core::acquire::Acquire;
 pub use sqlx_core::arguments::{Arguments, IntoArguments};
 pub use sqlx_core::column::Column;
@@ -28,7 +29,7 @@ pub use sqlx_core::query_builder::{self, QueryBuilder};
 #[doc(hidden)]
 pub use sqlx_core::query_scalar::query_scalar_with_result as __query_scalar_with_result;
 pub use sqlx_core::query_scalar::{query_scalar, query_scalar_with};
-pub use sqlx_core::raw_sql::{raw_sql, RawSql};
+pub use sqlx_core::raw_sql::{RawSql, raw_sql};
 pub use sqlx_core::row::Row;
 pub use sqlx_core::sql_str::{AssertSqlSafe, SqlSafeStr, SqlStr};
 pub use sqlx_core::statement::Statement;
@@ -36,7 +37,6 @@ pub use sqlx_core::transaction::Transaction;
 pub use sqlx_core::type_info::TypeInfo;
 pub use sqlx_core::types::Type;
 pub use sqlx_core::value::{Value, ValueRef};
-pub use sqlx_core::Either;
 
 #[doc(inline)]
 pub use sqlx_core::error::{self, Error, Result};
@@ -67,7 +67,7 @@ pub use sqlx_sqlite::{
 
 #[cfg(feature = "any")]
 #[cfg_attr(docsrs, doc(cfg(feature = "any")))]
-pub use crate::any::{reexports::*, Any, AnyExecutor};
+pub use crate::any::{Any, AnyExecutor, reexports::*};
 
 #[cfg(any(feature = "derive", feature = "macros"))]
 #[doc(hidden)]

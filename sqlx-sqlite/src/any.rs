@@ -161,7 +161,7 @@ impl<'a> TryFrom<&'a SqliteTypeInfo> for AnyTypeInfo {
                     return Err(sqlx_core::Error::AnyDriverError(
                         format!("Any driver does not support the SQLite type {sqlite_type:?}")
                             .into(),
-                    ))
+                    ));
                 }
             },
         })

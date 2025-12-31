@@ -2,8 +2,8 @@ use criterion::BenchmarkId;
 use criterion::Criterion;
 use criterion::{criterion_group, criterion_main};
 
-use sqlx::sqlite::{Sqlite, SqliteConnection};
 use sqlx::Executor;
+use sqlx::sqlite::{Sqlite, SqliteConnection};
 use sqlx_test::new;
 
 // Here we have an async function to benchmark

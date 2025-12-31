@@ -31,13 +31,13 @@ pub enum MigrateError {
     ForceNotSupported,
 
     #[deprecated = "migration types are now inferred"]
-    #[error("cannot mix reversible migrations with simple migrations. All migrations should be reversible or simple migrations")]
+    #[error(
+        "cannot mix reversible migrations with simple migrations. All migrations should be reversible or simple migrations"
+    )]
     InvalidMixReversibleAndSimple,
 
     // NOTE: this will only happen with a database that does not have transactional DDL (.e.g, MySQL or Oracle)
-    #[error(
-        "migration {0} is partially applied; fix and remove row from `_sqlx_migrations` table"
-    )]
+    #[error("migration {0} is partially applied; fix and remove row from `_sqlx_migrations` table")]
     Dirty(i64),
 
     #[error("database driver does not support creation of schemas at migrate time: {0}")]

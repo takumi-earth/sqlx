@@ -259,7 +259,7 @@ test_type!(decimal<sqlx::types::Decimal>(MySql,
 
 #[cfg(feature = "json")]
 mod json_tests {
-    use serde_json::{json, Value as JsonValue};
+    use serde_json::{Value as JsonValue, json};
 
     use sqlx::types::Json;
     use sqlx_test::test_type;

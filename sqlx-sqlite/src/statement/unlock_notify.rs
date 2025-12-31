@@ -3,7 +3,7 @@ use std::os::raw::c_int;
 use std::slice;
 use std::sync::{Condvar, Mutex};
 
-use libsqlite3_sys::{sqlite3, sqlite3_unlock_notify, SQLITE_OK};
+use libsqlite3_sys::{SQLITE_OK, sqlite3, sqlite3_unlock_notify};
 
 use crate::SqliteError;
 
@@ -11,13 +11,17 @@ use crate::SqliteError;
 pub unsafe fn wait(conn: *mut sqlite3) -> Result<(), SqliteError> {
     let notify = Notify::new();
 
-    if sqlite3_unlock_notify(
-        conn,
-        Some(unlock_notify_cb),
-        &notify as *const Notify as *mut Notify as *mut _,
-    ) != SQLITE_OK
+    // SAFETY: conn is a valid sqlite3 connection handle
+    if unsafe {
+        sqlite3_unlock_notify(
+            conn,
+            Some(unlock_notify_cb),
+            &notify as *const Notify as *mut Notify as *mut _,
+        )
+    } != SQLITE_OK
     {
-        return Err(SqliteError::new(conn));
+        // SAFETY: conn is a valid sqlite3 connection handle
+        return Err(unsafe { SqliteError::new(conn) });
     }
 
     notify.wait();
@@ -28,7 +32,8 @@ pub unsafe fn wait(conn: *mut sqlite3) -> Result<(), SqliteError> {
 unsafe extern "C" fn unlock_notify_cb(ptr: *mut *mut c_void, len: c_int) {
     let ptr = ptr as *mut &Notify;
     // We don't have a choice; we can't panic and unwind into FFI here.
-    let slice = slice::from_raw_parts(ptr, usize::try_from(len).unwrap_or(0));
+    // SAFETY: ptr is valid for len elements as provided by SQLite
+    let slice = unsafe { slice::from_raw_parts(ptr, usize::try_from(len).unwrap_or(0)) };
 
     for notify in slice {
         notify.fire();

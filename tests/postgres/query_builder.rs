@@ -1,7 +1,7 @@
-use sqlx::postgres::Postgres;
-use sqlx::query_builder::QueryBuilder;
 use sqlx::Executor;
 use sqlx::Type;
+use sqlx::postgres::Postgres;
+use sqlx::query_builder::QueryBuilder;
 use sqlx::{Either, Execute};
 use sqlx_test::new;
 

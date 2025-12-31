@@ -1,13 +1,13 @@
 use super::attributes::{
-    check_strong_enum_attributes, check_struct_attributes, check_transparent_attributes,
-    check_weak_enum_attributes, parse_container_attributes, TypeName,
+    TypeName, check_strong_enum_attributes, check_struct_attributes, check_transparent_attributes,
+    check_weak_enum_attributes, parse_container_attributes,
 };
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, quote_spanned};
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
 use syn::{
-    parse_quote, Data, DataEnum, DataStruct, DeriveInput, Field, Fields, FieldsNamed, Variant,
+    Data, DataEnum, DataStruct, DeriveInput, Field, Fields, FieldsNamed, Variant, parse_quote,
 };
 
 pub fn expand_derive_type(input: &DeriveInput) -> syn::Result<TokenStream> {

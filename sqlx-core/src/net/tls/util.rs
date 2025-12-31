@@ -2,7 +2,7 @@ use crate::net::Socket;
 
 use std::future;
 use std::io::{self, Read, Write};
-use std::task::{ready, Context, Poll};
+use std::task::{Context, Poll, ready};
 
 pub struct StdSocket<S> {
     pub socket: S,

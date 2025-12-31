@@ -12,12 +12,11 @@ pub fn load_password(
     database: Option<&str>,
 ) -> Option<String> {
     let custom_file = var_os("PGPASSFILE");
-    if let Some(file) = custom_file {
-        if let Some(password) =
+    if let Some(file) = custom_file
+        && let Some(password) =
             load_password_from_file(PathBuf::from(file), host, port, username, database)
-        {
-            return Some(password);
-        }
+    {
+        return Some(password);
     }
 
     #[cfg(not(target_os = "windows"))]

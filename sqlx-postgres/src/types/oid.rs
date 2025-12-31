@@ -1,5 +1,5 @@
 use byteorder::{BigEndian, ByteOrder};
-use serde::{de::Deserializer, ser::Serializer, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::Deserializer, ser::Serializer};
 
 use crate::decode::Decode;
 use crate::encode::{Encode, IsNull};

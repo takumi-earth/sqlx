@@ -1,4 +1,4 @@
-use crate::{type_info::PgType, PgArgumentBuffer, PgHasArrayType, PgTypeInfo, Postgres};
+use crate::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, Postgres, type_info::PgType};
 use core::cell::Cell;
 use sqlx_core::{
     database::Database,

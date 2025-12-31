@@ -4,7 +4,7 @@ extern crate proc_macro;
 use std::path::{Path, PathBuf};
 
 use proc_macro2::{Span, TokenStream};
-use quote::{quote, ToTokens, TokenStreamExt};
+use quote::{ToTokens, TokenStreamExt, quote};
 use sqlx_core::config::Config;
 use sqlx_core::migrate::{Migration, MigrationType};
 use syn::LitStr;

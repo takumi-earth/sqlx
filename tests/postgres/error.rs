@@ -1,4 +1,4 @@
-use sqlx::{error::ErrorKind, postgres::Postgres, Connection, Error};
+use sqlx::{Connection, Error, error::ErrorKind, postgres::Postgres};
 use sqlx_test::new;
 
 #[sqlx_macros::test]

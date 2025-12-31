@@ -1,7 +1,7 @@
 use std::any::type_name;
 
-use crate::any::type_info::AnyTypeInfo;
 use crate::any::Any;
+use crate::any::type_info::AnyTypeInfo;
 use crate::error::BoxDynError;
 use crate::type_info::TypeInfo;
 use crate::types::Type;

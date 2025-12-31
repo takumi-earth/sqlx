@@ -1,8 +1,8 @@
 use crate::decode::Decode;
 use crate::encode::{Encode, IsNull};
 use crate::error::BoxDynError;
-use crate::types::array_compatible;
 use crate::types::Type;
+use crate::types::array_compatible;
 use crate::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueRef, Postgres};
 use std::borrow::Cow;
 use std::rc::Rc;

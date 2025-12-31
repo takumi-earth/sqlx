@@ -76,9 +76,9 @@ impl Migrate for SqliteConnection {
                 return Ok(());
             }
 
-            Err(MigrateError::CreateSchemasNotSupported(
-                format!("cannot create new schema {schema_name}; creation of additional schemas in SQLite requires attaching extra database files"),
-            ))
+            Err(MigrateError::CreateSchemasNotSupported(format!(
+                "cannot create new schema {schema_name}; creation of additional schemas in SQLite requires attaching extra database files"
+            )))
         })
     }
 

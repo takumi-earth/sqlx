@@ -4,8 +4,8 @@ use crate::encode::{Encode, IsNull};
 use crate::error::BoxDynError;
 use crate::types::Type;
 use crate::{
-    protocol::text::{ColumnFlags, ColumnType},
     MySql, MySqlTypeInfo, MySqlValueRef,
+    protocol::text::{ColumnFlags, ColumnType},
 };
 
 impl Type<MySql> for bool {

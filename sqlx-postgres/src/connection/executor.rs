@@ -9,16 +9,16 @@ use crate::message::{
 };
 use crate::statement::PgStatementMetadata;
 use crate::{
-    statement::PgStatement, PgArguments, PgConnection, PgQueryResult, PgRow, PgTypeInfo,
-    PgValueFormat, Postgres,
+    PgArguments, PgConnection, PgQueryResult, PgRow, PgTypeInfo, PgValueFormat, Postgres,
+    statement::PgStatement,
 };
+use futures_core::Stream;
 use futures_core::future::BoxFuture;
 use futures_core::stream::BoxStream;
-use futures_core::Stream;
 use futures_util::TryStreamExt;
+use sqlx_core::Either;
 use sqlx_core::arguments::Arguments;
 use sqlx_core::sql_str::SqlStr;
-use sqlx_core::Either;
 use std::{pin::pin, sync::Arc};
 
 async fn prepare(
@@ -193,16 +193,17 @@ impl PgConnection {
         )
         .await?;
 
-        if persistent && self.inner.cache_statement.is_enabled() {
-            if let Some((id, _)) = self.inner.cache_statement.insert(sql, statement.clone()) {
-                self.inner.stream.write_msg(Close::Statement(id))?;
-                self.write_sync();
+        if persistent
+            && self.inner.cache_statement.is_enabled()
+            && let Some((id, _)) = self.inner.cache_statement.insert(sql, statement.clone())
+        {
+            self.inner.stream.write_msg(Close::Statement(id))?;
+            self.write_sync();
 
-                self.inner.stream.flush().await?;
+            self.inner.stream.flush().await?;
 
-                self.wait_for_close_complete(1).await?;
-                self.recv_ready_for_query().await?;
-            }
+            self.wait_for_close_complete(1).await?;
+            self.recv_ready_for_query().await?;
         }
 
         Ok(statement)

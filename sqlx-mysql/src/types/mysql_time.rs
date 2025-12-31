@@ -80,9 +80,7 @@ pub enum MySqlTimeError {
     /// Other range errors should be covered by [`Self::FieldRange`] for the `hours` field.
     ///
     /// For applications which can tolerate rounding, a valid truncated value is provided.
-    #[error(
-        "`MySqlTime` cannot exceed +/-838:59:59.000000; got {sign}838:59:59.{microseconds:06}"
-    )]
+    #[error("`MySqlTime` cannot exceed +/-838:59:59.000000; got {sign}838:59:59.{microseconds:06}")]
     SubsecondExcess {
         /// The sign of the magnitude.
         sign: MySqlTimeSign,

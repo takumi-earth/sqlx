@@ -4,8 +4,8 @@ use crate::message::DataRow;
 use crate::statement::PgStatementMetadata;
 use crate::value::PgValueFormat;
 use crate::{PgColumn, PgValueRef, Postgres};
-use sqlx_core::row::debug_row;
 pub(crate) use sqlx_core::row::Row;
+use sqlx_core::row::debug_row;
 use std::sync::Arc;
 
 /// Implementation of [`Row`] for PostgreSQL.

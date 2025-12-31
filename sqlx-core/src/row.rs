@@ -1,7 +1,7 @@
 use crate::column::{Column, ColumnIndex};
 use crate::database::Database;
 use crate::decode::Decode;
-use crate::error::{mismatched_types, Error};
+use crate::error::{Error, mismatched_types};
 
 use crate::type_checking::TypeChecking;
 use crate::type_info::TypeInfo;

@@ -1,6 +1,6 @@
 use uuid::{
-    fmt::{Hyphenated, Simple},
     Uuid,
+    fmt::{Hyphenated, Simple},
 };
 
 use crate::decode::Decode;

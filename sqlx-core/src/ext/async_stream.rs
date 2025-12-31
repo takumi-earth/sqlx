@@ -8,11 +8,11 @@ use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll};
 
+use futures_core::FusedFuture;
 use futures_core::future::BoxFuture;
 use futures_core::stream::Stream;
-use futures_core::FusedFuture;
-use futures_util::future::Fuse;
 use futures_util::FutureExt;
+use futures_util::future::Fuse;
 
 use crate::error::Error;
 

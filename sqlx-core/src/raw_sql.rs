@@ -2,11 +2,11 @@ use either::Either;
 use futures_core::future::BoxFuture;
 use futures_core::stream::BoxStream;
 
+use crate::Error;
 use crate::database::Database;
 use crate::error::BoxDynError;
 use crate::executor::{Execute, Executor};
 use crate::sql_str::{SqlSafeStr, SqlStr};
-use crate::Error;
 
 // AUTHOR'S NOTE: I was just going to call this API `sql()` and `Sql`, respectively,
 // but realized that would be extremely annoying to deal with as a SQLite user

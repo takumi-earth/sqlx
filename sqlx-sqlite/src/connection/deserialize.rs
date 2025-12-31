@@ -1,9 +1,9 @@
 use super::ConnectionState;
-use crate::{error::Error, SqliteConnection, SqliteError};
+use crate::{SqliteConnection, SqliteError, error::Error};
 use libsqlite3_sys::{
-    sqlite3_deserialize, sqlite3_free, sqlite3_malloc64, sqlite3_serialize,
     SQLITE_DESERIALIZE_FREEONCLOSE, SQLITE_DESERIALIZE_READONLY, SQLITE_DESERIALIZE_RESIZEABLE,
-    SQLITE_NOMEM, SQLITE_OK,
+    SQLITE_NOMEM, SQLITE_OK, sqlite3_deserialize, sqlite3_free, sqlite3_malloc64,
+    sqlite3_serialize,
 };
 use std::ffi::c_char;
 use std::fmt::Debug;
@@ -181,8 +181,10 @@ impl SqliteOwnedBuf {
     /// # Safety
     /// The allocated buffer is uninitialized.
     unsafe fn with_capacity(size: usize) -> Option<SqliteOwnedBuf> {
-        let ptr = sqlite3_malloc64(u64::try_from(size).unwrap()).cast::<u8>();
-        Self::from_raw(ptr, size)
+        // SAFETY: sqlite3_malloc64 is safe to call
+        let ptr = unsafe { sqlite3_malloc64(u64::try_from(size).unwrap()) }.cast::<u8>();
+        // SAFETY: ptr is either NULL or a valid allocation from sqlite3_malloc64
+        unsafe { Self::from_raw(ptr, size) }
     }
 
     /// Creates a new mem buffer from a pointer that has been created with sqlite_malloc

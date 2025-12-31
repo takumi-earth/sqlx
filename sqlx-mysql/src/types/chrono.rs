@@ -323,8 +323,14 @@ fn decode_time(len: u8, mut buf: &[u8]) -> Result<NaiveTime, BoxDynError> {
     let micros = u32::try_from(micros)
         .map_err(|_| format!("server returned microseconds out of range: {micros}"))?;
 
-    NaiveTime::from_hms_micro_opt(hour as u32, minute as u32, seconds as u32, micros)
-        .ok_or_else(|| format!("server returned invalid time: {hour:02}:{minute:02}:{seconds:02}; micros: {micros}").into())
+    NaiveTime::from_hms_micro_opt(hour as u32, minute as u32, seconds as u32, micros).ok_or_else(
+        || {
+            format!(
+                "server returned invalid time: {hour:02}:{minute:02}:{seconds:02}; micros: {micros}"
+            )
+            .into()
+        },
+    )
 }
 
 #[inline(always)]

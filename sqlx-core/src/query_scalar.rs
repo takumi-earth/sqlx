@@ -9,7 +9,7 @@ use crate::error::{BoxDynError, Error};
 use crate::executor::{Execute, Executor};
 use crate::from_row::FromRow;
 use crate::query_as::{
-    query_as, query_as_with_result, query_statement_as, query_statement_as_with, QueryAs,
+    QueryAs, query_as, query_as_with_result, query_statement_as, query_statement_as_with,
 };
 use crate::sql_str::{SqlSafeStr, SqlStr};
 use crate::types::Type;

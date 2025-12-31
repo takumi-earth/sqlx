@@ -1,7 +1,7 @@
+use sqlx::TypeInfo;
 use sqlx::error::DatabaseError;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteError};
-use sqlx::TypeInfo;
-use sqlx::{sqlite::Sqlite, Column, Executor};
+use sqlx::{Column, Executor, sqlite::Sqlite};
 use sqlx::{ConnectOptions, SqlSafeStr};
 use sqlx_test::new;
 use std::env;

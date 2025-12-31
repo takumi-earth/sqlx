@@ -10,8 +10,8 @@ use std::ptr::NonNull;
 
 use futures_intrusive::sync::MutexGuard;
 use libsqlite3_sys::{
-    sqlite3, sqlite3_commit_hook, sqlite3_progress_handler, sqlite3_rollback_hook,
-    sqlite3_update_hook, SQLITE_DELETE, SQLITE_INSERT, SQLITE_UPDATE,
+    SQLITE_DELETE, SQLITE_INSERT, SQLITE_UPDATE, sqlite3, sqlite3_commit_hook,
+    sqlite3_progress_handler, sqlite3_rollback_hook, sqlite3_update_hook,
 };
 #[cfg(feature = "preupdate-hook")]
 pub use preupdate_hook::*;

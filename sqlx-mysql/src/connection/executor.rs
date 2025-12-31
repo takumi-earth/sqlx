@@ -1,4 +1,5 @@
 use super::MySqlStream;
+use crate::HashMap;
 use crate::connection::stream::Waiting;
 use crate::describe::Describe;
 use crate::error::Error;
@@ -12,15 +13,14 @@ use crate::protocol::statement::{
 };
 use crate::protocol::text::{ColumnDefinition, ColumnFlags, Query, TextRow};
 use crate::statement::{MySqlStatement, MySqlStatementMetadata};
-use crate::HashMap;
 use crate::{
     MySql, MySqlArguments, MySqlColumn, MySqlConnection, MySqlQueryResult, MySqlRow, MySqlTypeInfo,
     MySqlValueFormat,
 };
 use either::Either;
+use futures_core::Stream;
 use futures_core::future::BoxFuture;
 use futures_core::stream::BoxStream;
-use futures_core::Stream;
 use futures_util::TryStreamExt;
 use sqlx_core::column::{ColumnOrigin, TableColumn};
 use sqlx_core::sql_str::SqlStr;

@@ -6,6 +6,7 @@ use futures_core::stream::BoxStream;
 
 use sqlx_core::bytes::{BufMut, Bytes};
 
+use crate::Postgres;
 use crate::connection::PgConnection;
 use crate::error::{Error, Result};
 use crate::ext::async_stream::TryAsyncStream;
@@ -15,7 +16,6 @@ use crate::message::{
     CopyOutResponse, CopyResponseData, Query, ReadyForQuery,
 };
 use crate::pool::{Pool, PoolConnection};
-use crate::Postgres;
 
 impl PgConnection {
     /// Issue a `COPY FROM STDIN` statement and transition the connection to streaming data

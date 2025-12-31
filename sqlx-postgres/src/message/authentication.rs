@@ -7,7 +7,7 @@ use crate::error::Error;
 use crate::io::ProtocolDecode;
 
 use crate::message::{BackendMessage, BackendMessageFormat};
-use base64::prelude::{Engine as _, BASE64_STANDARD};
+use base64::prelude::{BASE64_STANDARD, Engine as _};
 // On startup, the server sends an appropriate authentication request message,
 // to which the frontend must reply with an appropriate authentication
 // response message (such as a password).

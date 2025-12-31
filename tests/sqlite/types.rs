@@ -1,7 +1,7 @@
 extern crate time_ as time;
 
-use sqlx::sqlite::{Sqlite, SqliteRow};
 use sqlx::Type;
+use sqlx::sqlite::{Sqlite, SqliteRow};
 use sqlx_core::executor::Executor;
 use sqlx_core::row::Row;
 use sqlx_core::types::Text;
@@ -50,7 +50,7 @@ test_type!(bytes<Vec<u8>>(Sqlite,
 #[cfg(feature = "json")]
 mod json_tests {
     use super::*;
-    use serde_json::{json, Value as JsonValue};
+    use serde_json::{Value as JsonValue, json};
     use sqlx::types::Json;
     use sqlx_test::test_type;
 

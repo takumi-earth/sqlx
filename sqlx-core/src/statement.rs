@@ -115,9 +115,9 @@ macro_rules! impl_statement_query {
         >
         where
             O: for<'r> $crate::from_row::FromRow<
-                'r,
-                <Self::Database as $crate::database::Database>::Row,
-            >,
+                    'r,
+                    <Self::Database as $crate::database::Database>::Row,
+                >,
         {
             $crate::query_as::query_statement_as(self)
         }
@@ -129,9 +129,9 @@ macro_rules! impl_statement_query {
         ) -> $crate::query_as::QueryAs<'s, Self::Database, O, A>
         where
             O: for<'r> $crate::from_row::FromRow<
-                'r,
-                <Self::Database as $crate::database::Database>::Row,
-            >,
+                    'r,
+                    <Self::Database as $crate::database::Database>::Row,
+                >,
             A: $crate::arguments::IntoArguments<Self::Database>,
         {
             $crate::query_as::query_statement_as_with(self, arguments)
@@ -148,9 +148,9 @@ macro_rules! impl_statement_query {
         >
         where
             (O,): for<'r> $crate::from_row::FromRow<
-                'r,
-                <Self::Database as $crate::database::Database>::Row,
-            >,
+                    'r,
+                    <Self::Database as $crate::database::Database>::Row,
+                >,
         {
             $crate::query_scalar::query_statement_scalar(self)
         }
@@ -162,9 +162,9 @@ macro_rules! impl_statement_query {
         ) -> $crate::query_scalar::QueryScalar<'s, Self::Database, O, A>
         where
             (O,): for<'r> $crate::from_row::FromRow<
-                'r,
-                <Self::Database as $crate::database::Database>::Row,
-            >,
+                    'r,
+                    <Self::Database as $crate::database::Database>::Row,
+                >,
             A: $crate::arguments::IntoArguments<Self::Database>,
         {
             $crate::query_scalar::query_statement_scalar_with(self, arguments)

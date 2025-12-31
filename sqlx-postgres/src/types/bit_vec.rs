@@ -1,10 +1,10 @@
 use crate::arguments::value_size_int4_checked;
 use crate::{
+    PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueFormat, PgValueRef, Postgres,
     decode::Decode,
     encode::{Encode, IsNull},
     error::BoxDynError,
     types::Type,
-    PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueFormat, PgValueRef, Postgres,
 };
 use bit_vec::BitVec;
 use sqlx_core::bytes::Buf;

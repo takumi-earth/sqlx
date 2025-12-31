@@ -1,26 +1,26 @@
 use std::future;
 use std::io::{self, Read, Write};
 use std::sync::Arc;
-use std::task::{ready, Context, Poll};
+use std::task::{Context, Poll, ready};
 
 use rustls::{
-    client::{
-        danger::{ServerCertVerified, ServerCertVerifier},
-        WebPkiServerVerifier,
-    },
-    crypto::{verify_tls12_signature, verify_tls13_signature, CryptoProvider},
-    pki_types::{
-        pem::{self, PemObject},
-        CertificateDer, PrivateKeyDer, ServerName, UnixTime,
-    },
     CertificateError, ClientConfig, ClientConnection, Error as TlsError, RootCertStore,
+    client::{
+        WebPkiServerVerifier,
+        danger::{ServerCertVerified, ServerCertVerifier},
+    },
+    crypto::{CryptoProvider, verify_tls12_signature, verify_tls13_signature},
+    pki_types::{
+        CertificateDer, PrivateKeyDer, ServerName, UnixTime,
+        pem::{self, PemObject},
+    },
 };
 
 use crate::error::Error;
 use crate::io::ReadBuf;
-use crate::net::tls::util::StdSocket;
-use crate::net::tls::TlsConfig;
 use crate::net::Socket;
+use crate::net::tls::TlsConfig;
+use crate::net::tls::util::StdSocket;
 
 pub struct RustlsSocket<S: Socket> {
     inner: StdSocket<S>,
@@ -119,7 +119,7 @@ where
         (_, _) => {
             return Err(Error::Configuration(
                 "user auth key and certs must be given together".into(),
-            ))
+            ));
         }
     };
 

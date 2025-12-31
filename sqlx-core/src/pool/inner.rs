@@ -3,7 +3,7 @@ use crate::connection::ConnectOptions;
 use crate::connection::Connection;
 use crate::database::Database;
 use crate::error::Error;
-use crate::pool::{deadline_as_timeout, CloseEvent, Pool, PoolOptions};
+use crate::pool::{CloseEvent, Pool, PoolOptions, deadline_as_timeout};
 use crossbeam_queue::ArrayQueue;
 
 use crate::sync::{AsyncSemaphore, AsyncSemaphoreReleaser};

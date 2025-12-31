@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
-use percent_encoding::{percent_decode_str, utf8_percent_encode, NON_ALPHANUMERIC};
+use percent_encoding::{NON_ALPHANUMERIC, percent_decode_str, utf8_percent_encode};
 use sqlx_core::Url;
 
-use crate::{error::Error, MySqlSslMode};
+use crate::{MySqlSslMode, error::Error};
 
 use super::MySqlConnectOptions;
 

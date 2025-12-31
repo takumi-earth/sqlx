@@ -4,7 +4,7 @@ use crate::{
 };
 use futures_core::future::BoxFuture;
 use futures_core::stream::BoxStream;
-use futures_util::{stream, FutureExt, StreamExt, TryFutureExt, TryStreamExt};
+use futures_util::{FutureExt, StreamExt, TryFutureExt, TryStreamExt, stream};
 use sqlx_core::sql_str::SqlStr;
 use std::{future, pin::pin};
 
@@ -84,12 +84,12 @@ impl AnyConnectionBackend for PgConnection {
         query: SqlStr,
         persistent: bool,
         arguments: Option<AnyArguments>,
-    ) -> BoxStream<sqlx_core::Result<Either<AnyQueryResult, AnyRow>>> {
+    ) -> BoxStream<'_, sqlx_core::Result<Either<AnyQueryResult, AnyRow>>> {
         let persistent = persistent && arguments.is_some();
         let arguments = match arguments.map(AnyArguments::convert_into).transpose() {
             Ok(arguments) => arguments,
             Err(error) => {
-                return stream::once(future::ready(Err(sqlx_core::Error::Encode(error)))).boxed()
+                return stream::once(future::ready(Err(sqlx_core::Error::Encode(error)))).boxed();
             }
         };
 
@@ -110,7 +110,7 @@ impl AnyConnectionBackend for PgConnection {
         query: SqlStr,
         persistent: bool,
         arguments: Option<AnyArguments>,
-    ) -> BoxFuture<sqlx_core::Result<Option<AnyRow>>> {
+    ) -> BoxFuture<'_, sqlx_core::Result<Option<AnyRow>>> {
         let persistent = persistent && arguments.is_some();
         let arguments = arguments
             .map(AnyArguments::convert_into)
@@ -200,7 +200,7 @@ impl<'a> TryFrom<&'a PgTypeInfo> for AnyTypeInfo {
                 _ => {
                     return Err(sqlx_core::Error::AnyDriverError(
                         format!("Any driver does not support the Postgres type {pg_type:?}").into(),
-                    ))
+                    ));
                 }
             },
         })

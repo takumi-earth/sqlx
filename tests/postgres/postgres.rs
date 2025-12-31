@@ -2,15 +2,15 @@ use futures_util::{Stream, StreamExt, TryStreamExt};
 
 use sqlx::postgres::types::Oid;
 use sqlx::postgres::{
-    PgAdvisoryLock, PgConnectOptions, PgConnection, PgDatabaseError, PgErrorPosition, PgListener,
-    PgPoolOptions, PgRow, PgSeverity, Postgres, PG_COPY_MAX_DATA_LEN,
+    PG_COPY_MAX_DATA_LEN, PgAdvisoryLock, PgConnectOptions, PgConnection, PgDatabaseError,
+    PgErrorPosition, PgListener, PgPoolOptions, PgRow, PgSeverity, Postgres,
 };
 use sqlx::{Column, Connection, Executor, Row, SqlSafeStr, Statement, TypeInfo};
 use sqlx_core::sql_str::AssertSqlSafe;
 use sqlx_core::{bytes::Bytes, error::BoxDynError};
 use sqlx_test::{new, pool, setup_if_needed};
 use std::env;
-use std::pin::{pin, Pin};
+use std::pin::{Pin, pin};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -439,10 +439,12 @@ async fn it_can_work_with_failed_transactions() -> anyhow::Result<()> {
         .execute(tx.as_mut())
         .await?;
 
-    assert!(sqlx::query("SELECT 1 WHERE pg_sleep(0.30) IS NULL")
-        .fetch_one(tx.as_mut())
-        .await
-        .is_err());
+    assert!(
+        sqlx::query("SELECT 1 WHERE pg_sleep(0.30) IS NULL")
+            .fetch_one(tx.as_mut())
+            .await
+            .is_err()
+    );
     tx.rollback().await?;
 
     // conn should be usable again, as we explicitly rolled back the transaction
@@ -611,7 +613,7 @@ async fn it_can_drop_multiple_transactions() -> anyhow::Result<()> {
 #[ignore]
 #[sqlx_macros::test]
 async fn pool_smoke_test() -> anyhow::Result<()> {
-    use futures_util::{task::Poll, Future};
+    use futures_util::{Future, task::Poll};
 
     eprintln!("starting pool");
 
@@ -1586,9 +1588,10 @@ VALUES
     // updated accordingly.
     match row {
         Ok(_) => panic!("full support for custom types is not implemented yet"),
-        Err(e) => assert!(e
-            .to_string()
-            .contains("custom types in records are not fully supported yet")),
+        Err(e) => assert!(
+            e.to_string()
+                .contains("custom types in records are not fully supported yet")
+        ),
     }
     Ok(())
 }

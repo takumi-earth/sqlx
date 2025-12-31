@@ -2,11 +2,11 @@
 
 use std::sync::Arc;
 
+use sqlx_core::HashMap;
 use sqlx_core::column::ColumnIndex;
 use sqlx_core::error::Error;
 use sqlx_core::ext::ustr::UStr;
-use sqlx_core::row::{debug_row, Row};
-use sqlx_core::HashMap;
+use sqlx_core::row::{Row, debug_row};
 
 use crate::statement::StatementHandle;
 use crate::{Sqlite, SqliteColumn, SqliteValue, SqliteValueRef};

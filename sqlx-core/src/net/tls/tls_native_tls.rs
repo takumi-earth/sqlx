@@ -1,11 +1,11 @@
 use std::io::{self, Read, Write};
 
-use crate::io::ReadBuf;
-use crate::net::tls::util::StdSocket;
-use crate::net::tls::TlsConfig;
-use crate::net::Socket;
-use crate::rt;
 use crate::Error;
+use crate::io::ReadBuf;
+use crate::net::Socket;
+use crate::net::tls::TlsConfig;
+use crate::net::tls::util::StdSocket;
+use crate::rt;
 
 use native_tls::{HandshakeError, Identity};
 use std::task::{Context, Poll};

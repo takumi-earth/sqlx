@@ -1,6 +1,6 @@
 use std::{future::Future, pin::pin, time::Duration};
 
-use futures_util::future::{select, Either};
+use futures_util::future::{Either, select};
 
 use crate::rt::TimeoutError;
 

@@ -4,8 +4,8 @@ use crate::error::BoxDynError;
 use crate::types::array_compatible;
 use crate::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueFormat, PgValueRef, Postgres};
 use serde::{Deserialize, Serialize};
-use serde_json::value::RawValue as JsonRawValue;
 use serde_json::Value as JsonValue;
+use serde_json::value::RawValue as JsonRawValue;
 pub(crate) use sqlx_core::types::{Json, Type};
 
 // <https://www.postgresql.org/docs/12/datatype-json.html>

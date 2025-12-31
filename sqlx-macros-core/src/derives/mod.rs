@@ -6,8 +6,8 @@ mod r#type;
 
 pub use decode::expand_derive_decode;
 pub use encode::expand_derive_encode;
-pub use r#type::expand_derive_type;
 pub use row::expand_derive_from_row;
+pub use r#type::expand_derive_type;
 
 use self::attributes::RenameAll;
 use heck::{ToKebabCase, ToLowerCamelCase, ToShoutySnakeCase, ToSnakeCase, ToUpperCamelCase};

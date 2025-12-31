@@ -2,11 +2,11 @@
 
 use std::cmp;
 use std::os::raw::c_char;
-use std::ptr::{null, null_mut, NonNull};
+use std::ptr::{NonNull, null, null_mut};
 use std::sync::Arc;
 
 use libsqlite3_sys::{
-    sqlite3, sqlite3_prepare_v3, sqlite3_stmt, SQLITE_OK, SQLITE_PREPARE_PERSISTENT,
+    SQLITE_OK, SQLITE_PREPARE_PERSISTENT, sqlite3, sqlite3_prepare_v3, sqlite3_stmt,
 };
 
 use sqlx_core::bytes::{Buf, Bytes};

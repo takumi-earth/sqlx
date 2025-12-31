@@ -130,7 +130,7 @@ impl PgConnection {
                     return Err(err_protocol!(
                         "establish: unexpected message: {:?}",
                         message.format
-                    ))
+                    ));
                 }
             }
         }

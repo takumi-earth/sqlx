@@ -1,16 +1,16 @@
 use std::{
-    collections::{btree_map, BTreeMap},
+    collections::{BTreeMap, btree_map},
     mem,
     ops::{Deref, DerefMut},
     str,
 };
 
 use crate::{
+    PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueRef, Postgres,
     decode::Decode,
     encode::{Encode, IsNull},
     error::BoxDynError,
     types::Type,
-    PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueRef, Postgres,
 };
 use serde::{Deserialize, Serialize};
 use sqlx_core::bytes::Buf;
@@ -261,8 +261,7 @@ mod test {
 
     const EMPTY: &str = "00000000";
 
-    const NAME_SURNAME_AGE: &str =
-        "0000000300000003616765ffffffff000000046e616d65000000044a6f686e000000077375726e616d6500000003446f65";
+    const NAME_SURNAME_AGE: &str = "0000000300000003616765ffffffff000000046e616d65000000044a6f686e000000077375726e616d6500000003446f65";
 
     #[test]
     fn hstore_deserialize_ok() {
