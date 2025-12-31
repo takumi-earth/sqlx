@@ -1,3 +1,4 @@
+use crate::HashMap;
 use crate::any::{Any, AnyArguments, AnyColumn, AnyTypeInfo};
 use crate::column::ColumnIndex;
 use crate::database::Database;
@@ -5,7 +6,6 @@ use crate::error::Error;
 use crate::ext::ustr::UStr;
 use crate::sql_str::SqlStr;
 use crate::statement::Statement;
-use crate::HashMap;
 use either::Either;
 use std::sync::Arc;
 

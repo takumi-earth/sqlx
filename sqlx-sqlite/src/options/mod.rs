@@ -18,7 +18,7 @@ pub use synchronous::SqliteSynchronous;
 
 use crate::common::DebugFn;
 use crate::connection::collation::Collation;
-use sqlx_core::{config, IndexMap};
+use sqlx_core::{IndexMap, config};
 
 /// Options and flags which can be used to configure a SQLite connection.
 ///

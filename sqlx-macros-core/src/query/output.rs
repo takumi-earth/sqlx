@@ -1,5 +1,5 @@
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, ToTokens, TokenStreamExt};
+use quote::{ToTokens, TokenStreamExt, quote};
 use syn::Type;
 
 use sqlx_core::column::{Column, ColumnOrigin};
@@ -13,8 +13,8 @@ use sqlx_core::type_checking;
 use sqlx_core::type_checking::TypeChecking;
 use sqlx_core::type_info::TypeInfo;
 use std::fmt::{self, Display, Formatter};
-use syn::parse::{Parse, ParseStream};
 use syn::Token;
+use syn::parse::{Parse, ParseStream};
 
 pub struct RustColumn {
     pub(super) ident: Ident,
@@ -67,6 +67,7 @@ enum ColumnNullabilityOverride {
     None,
 }
 
+#[allow(clippy::large_enum_variant)]
 enum ColumnTypeOverride {
     Exact(Type),
     Wildcard,
@@ -185,7 +186,7 @@ pub fn quote_query_as<DB: DatabaseExt>(
     let row_path = DB::row_path();
 
     // if this query came from a file, use `include_str!()` to tell the compiler where it came from
-    let sql = if let Some(ref path) = &input.file_path {
+    let sql = if let Some(path) = &input.file_path {
         quote::quote_spanned! { input.src_span => include_str!(#path) }
     } else {
         let sql = &input.sql;
@@ -248,10 +249,10 @@ fn get_column_type<DB: DatabaseExt>(
     i: usize,
     column: &DB::Column,
 ) -> TokenStream {
-    if let ColumnOrigin::Table(origin) = column.origin() {
-        if let Some(column_override) = config.macros.column_override(&origin.table, &origin.name) {
-            return column_override.parse().unwrap();
-        }
+    if let ColumnOrigin::Table(origin) = column.origin()
+        && let Some(column_override) = config.macros.column_override(&origin.table, &origin.name)
+    {
+        return column_override.parse().unwrap();
     }
 
     let type_info = column.type_info();

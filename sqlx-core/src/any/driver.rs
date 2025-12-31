@@ -3,7 +3,7 @@ use crate::any::{AnyConnectOptions, AnyConnection};
 use crate::common::DebugFn;
 use crate::connection::Connection;
 use crate::database::Database;
-use crate::{config, Error};
+use crate::{Error, config};
 use futures_core::future::BoxFuture;
 use std::fmt::{Debug, Formatter};
 use std::sync::OnceLock;

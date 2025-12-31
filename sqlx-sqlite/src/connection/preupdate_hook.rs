@@ -2,8 +2,8 @@ use super::SqliteOperation;
 use crate::{SqliteError, SqliteValueRef};
 
 use libsqlite3_sys::{
-    sqlite3, sqlite3_preupdate_count, sqlite3_preupdate_depth, sqlite3_preupdate_new,
-    sqlite3_preupdate_old, sqlite3_value, SQLITE_OK,
+    SQLITE_OK, sqlite3, sqlite3_preupdate_count, sqlite3_preupdate_depth, sqlite3_preupdate_new,
+    sqlite3_preupdate_old, sqlite3_value,
 };
 use std::ffi::CStr;
 use std::marker::PhantomData;
@@ -119,9 +119,13 @@ impl<'a> PreupdateHookResult<'a> {
         p_value: *mut sqlite3_value,
     ) -> Result<SqliteValueRef<'a>, PreupdateError> {
         if ret != SQLITE_OK {
-            return Err(PreupdateError::Database(SqliteError::new(self.db)));
+            // SAFETY: self.db is a valid sqlite3 connection handle
+            return Err(PreupdateError::Database(unsafe {
+                SqliteError::new(self.db)
+            }));
         }
-        Ok(SqliteValueRef::borrowed(p_value))
+        // SAFETY: p_value is a valid sqlite3_value pointer provided by SQLite
+        Ok(unsafe { SqliteValueRef::borrowed(p_value) })
     }
 }
 

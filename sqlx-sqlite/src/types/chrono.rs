@@ -2,12 +2,12 @@ use std::fmt::Display;
 
 use crate::value::ValueRef;
 use crate::{
+    Sqlite, SqliteArgumentsBuffer, SqliteTypeInfo, SqliteValueRef,
     decode::Decode,
     encode::{Encode, IsNull},
     error::BoxDynError,
     type_info::DataType,
     types::Type,
-    Sqlite, SqliteArgumentsBuffer, SqliteTypeInfo, SqliteValueRef,
 };
 use chrono::FixedOffset;
 use chrono::{

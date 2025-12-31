@@ -3,8 +3,8 @@ use crate::error::Error;
 use crate::logger::QueryLogger;
 use crate::statement::{StatementHandle, VirtualStatement};
 use crate::{SqliteArguments, SqliteQueryResult, SqliteRow};
-use sqlx_core::sql_str::SqlSafeStr;
 use sqlx_core::Either;
+use sqlx_core::sql_str::SqlSafeStr;
 
 pub struct ExecuteIter<'a> {
     handle: &'a mut ConnectionHandle,

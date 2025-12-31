@@ -3,8 +3,8 @@ use crate::io::BufMutExt;
 use crate::message::{
     BackendMessage, BackendMessageFormat, FrontendMessage, FrontendMessageFormat,
 };
-use sqlx_core::bytes::{Buf, Bytes};
 use sqlx_core::Error;
+use sqlx_core::bytes::{Buf, Bytes};
 use std::num::Saturating;
 use std::ops::Deref;
 

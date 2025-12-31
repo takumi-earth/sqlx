@@ -7,8 +7,8 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use sqlx::postgres::types::{Oid, PgCiText, PgInterval, PgMoney, PgRange};
 use sqlx::postgres::Postgres;
+use sqlx::postgres::types::{Oid, PgCiText, PgInterval, PgMoney, PgRange};
 use sqlx_test::{new, test_decode_type, test_prepared_type, test_type};
 
 use sqlx_core::executor::Executor;
@@ -405,7 +405,7 @@ mod time_tests {
 mod json {
     use super::*;
     use serde_json::value::RawValue as JsonRawValue;
-    use serde_json::{json, Value as JsonValue};
+    use serde_json::{Value as JsonValue, json};
     use sqlx::postgres::PgRow;
     use sqlx::types::Json;
     use sqlx::{Executor, Row};

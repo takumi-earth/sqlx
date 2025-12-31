@@ -3,11 +3,11 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use percent_encoding::{percent_decode_str, percent_encode, AsciiSet};
+use percent_encoding::{AsciiSet, percent_decode_str, percent_encode};
 use url::Url;
 
-use crate::error::Error;
 use crate::SqliteConnectOptions;
+use crate::error::Error;
 
 // https://www.sqlite.org/uri.html
 

@@ -6,8 +6,8 @@ use sqlx_core::executor::Executor;
 use sqlx_core::sql_str::AssertSqlSafe;
 use sqlx_core::sql_str::SqlSafeStr;
 use sqlx_core::type_checking::TypeChecking;
-use std::collections::hash_map;
 use std::collections::HashMap;
+use std::collections::hash_map;
 use std::sync::{LazyLock, Mutex};
 
 #[cfg(any(feature = "postgres", feature = "mysql", feature = "_sqlite"))]

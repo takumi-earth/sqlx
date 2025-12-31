@@ -3,8 +3,8 @@ use crate::encode::{Encode, IsNull};
 use crate::error::BoxDynError;
 use crate::types::Type;
 use crate::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueFormat, PgValueRef, Postgres};
-use sqlx_core::bytes::Buf;
 use sqlx_core::Error;
+use sqlx_core::bytes::Buf;
 use std::str::FromStr;
 
 const ERROR: &str = "error decoding CIRCLE";

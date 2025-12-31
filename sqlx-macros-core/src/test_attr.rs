@@ -191,8 +191,8 @@ fn expand_advanced(args: AttributeArgs, input: syn::ItemFn) -> crate::Result<Tok
 #[cfg(feature = "migrate")]
 fn parse_args(attr_args: AttributeArgs) -> syn::Result<Args> {
     use syn::{
-        parenthesized, parse::Parse, punctuated::Punctuated, token::Comma, Expr, Lit, LitStr, Meta,
-        MetaNameValue, Token,
+        Expr, Lit, LitStr, Meta, MetaNameValue, Token, parenthesized, parse::Parse,
+        punctuated::Punctuated, token::Comma,
     };
 
     let mut fixtures = Vec::new();
@@ -296,7 +296,7 @@ fn parse_args(attr_args: AttributeArgs) -> syn::Result<Args> {
                 return Err(syn::Error::new_spanned(
                     arg,
                     r#"expected `fixtures("<filename>", ...)` or `migrations = "<path>" | false` or `migrator = "<rust path>"`"#,
-                ))
+                ));
             }
         }
     }
@@ -347,7 +347,7 @@ fn parse_fixtures_args(
             return Err(syn::Error::new_spanned(
                 litstr,
                 "custom relative path fixtures must be defined in `scripts` argument",
-            ))
+            ));
         }
     }
     if (matches!(fixtures_type, FixturesType::ExplicitPath) && !is_explicit_path) {

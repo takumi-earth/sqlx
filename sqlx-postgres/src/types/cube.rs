@@ -3,8 +3,8 @@ use crate::encode::{Encode, IsNull};
 use crate::error::BoxDynError;
 use crate::types::Type;
 use crate::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueFormat, PgValueRef, Postgres};
-use sqlx_core::bytes::Buf;
 use sqlx_core::Error;
+use sqlx_core::bytes::Buf;
 use std::mem;
 use std::str::FromStr;
 
@@ -206,7 +206,7 @@ impl PgCube {
 }
 
 fn read_vec(bytes: &mut &[u8]) -> Result<Vec<f64>, String> {
-    if bytes.len() % BYTE_WIDTH != 0 {
+    if !bytes.len().is_multiple_of(BYTE_WIDTH) {
         return Err(format!(
             "data length not divisible by {BYTE_WIDTH}: {}",
             bytes.len()

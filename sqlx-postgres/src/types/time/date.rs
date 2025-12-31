@@ -1,8 +1,8 @@
 use crate::decode::Decode;
 use crate::encode::{Encode, IsNull};
 use crate::error::BoxDynError;
-use crate::types::time::PG_EPOCH;
 use crate::types::Type;
+use crate::types::time::PG_EPOCH;
 use crate::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueFormat, PgValueRef, Postgres};
 use std::mem;
 use time::macros::format_description;

@@ -66,7 +66,8 @@ impl SqliteValue {
         column_type: Option<SqliteTypeInfo>,
     ) -> Self {
         debug_assert!(!value.is_null());
-        let handle = ValueHandle::try_dup_of(value, column_type)
+        // SAFETY: caller guarantees value is valid and non-null
+        let handle = unsafe { ValueHandle::try_dup_of(value, column_type) }
             .expect("SQLite failed to allocate memory for duplicated value");
         Self(handle)
     }
@@ -146,7 +147,8 @@ impl<'r> SqliteValueRef<'r> {
     #[allow(unused)]
     pub(crate) unsafe fn borrowed(value: *mut sqlite3_value) -> Self {
         debug_assert!(!value.is_null());
-        let handle = ValueHandle::temporary(NonNull::new_unchecked(value));
+        // SAFETY: caller guarantees value is non-null
+        let handle = ValueHandle::temporary(unsafe { NonNull::new_unchecked(value) });
         Self(Cow::Owned(handle))
     }
 
@@ -234,7 +236,9 @@ struct Blob {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("given `SqliteValue` was previously decoded as BLOB or TEXT; `SqliteValue::reset_borrow()` must be called first")]
+#[error(
+    "given `SqliteValue` was previously decoded as BLOB or TEXT; `SqliteValue::reset_borrow()` must be called first"
+)]
 pub(crate) struct BorrowedBlobError;
 
 // SAFE: only protected value objects are stored in SqliteValue
@@ -387,6 +391,7 @@ impl ValueHandle {
         // to prevent
         let blob = self.borrowed_blob.get_or_init(|| blob);
 
+        // SAFETY: caller guarantees lifetime 'a doesn't outlive self
         unsafe { blob.as_slice() }
     }
 
@@ -397,7 +402,7 @@ impl ValueHandle {
             return Ok("");
         };
 
-        // SAFETY: lifetime of `blob` will be tied to `'b`.
+        // SAFETY: caller guarantees lifetime 'b doesn't outlive self
         let s = str::from_utf8(unsafe { blob.as_slice() })?;
 
         // We only store the borrow after we ensure the string is valid.
@@ -411,6 +416,7 @@ impl Blob {
     /// # Safety
     /// `'a` must not outlive the `sqlite3_value` this blob came from.
     unsafe fn as_slice<'a>(&self) -> &'a [u8] {
-        slice::from_raw_parts(self.ptr, self.len)
+        // SAFETY: caller guarantees lifetime 'a doesn't outlive the sqlite3_value
+        unsafe { slice::from_raw_parts(self.ptr, self.len) }
     }
 }

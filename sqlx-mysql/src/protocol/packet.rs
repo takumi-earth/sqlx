@@ -5,8 +5,8 @@ use bytes::Bytes;
 
 use crate::error::Error;
 use crate::io::{ProtocolDecode, ProtocolEncode};
-use crate::protocol::response::{EofPacket, OkPacket};
 use crate::protocol::Capabilities;
+use crate::protocol::response::{EofPacket, OkPacket};
 
 #[derive(Debug)]
 pub struct Packet<T>(pub(crate) T);

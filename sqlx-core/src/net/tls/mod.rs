@@ -3,8 +3,8 @@
 use std::path::PathBuf;
 
 use crate::error::Error;
-use crate::net::socket::WithSocket;
 use crate::net::Socket;
+use crate::net::socket::WithSocket;
 
 #[cfg(feature = "_tls-rustls")]
 mod tls_rustls;

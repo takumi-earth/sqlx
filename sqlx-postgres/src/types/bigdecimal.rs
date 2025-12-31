@@ -5,8 +5,8 @@ use std::cmp;
 use crate::decode::Decode;
 use crate::encode::{Encode, IsNull};
 use crate::error::BoxDynError;
-use crate::types::numeric::{PgNumeric, PgNumericSign};
 use crate::types::Type;
+use crate::types::numeric::{PgNumeric, PgNumericSign};
 use crate::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueFormat, PgValueRef, Postgres};
 
 impl Type<Postgres> for BigDecimal {

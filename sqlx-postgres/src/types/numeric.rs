@@ -1,8 +1,8 @@
 use sqlx_core::bytes::Buf;
 use std::num::Saturating;
 
-use crate::error::BoxDynError;
 use crate::PgArgumentBuffer;
+use crate::error::BoxDynError;
 
 /// Represents a `NUMERIC` value in the **Postgres** wire protocol.
 #[derive(Debug, PartialEq, Eq)]

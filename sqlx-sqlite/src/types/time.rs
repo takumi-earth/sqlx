@@ -1,14 +1,14 @@
 use crate::arguments::SqliteArgumentsBuffer;
 use crate::value::ValueRef;
 use crate::{
+    Sqlite, SqliteTypeInfo, SqliteValueRef,
     decode::Decode,
     encode::{Encode, IsNull},
     error::BoxDynError,
     type_info::DataType,
     types::Type,
-    Sqlite, SqliteTypeInfo, SqliteValueRef,
 };
-use time::format_description::{well_known::Rfc3339, BorrowedFormatItem};
+use time::format_description::{BorrowedFormatItem, well_known::Rfc3339};
 use time::macros::format_description as fd;
 use time::{Date, OffsetDateTime, PrimitiveDateTime, Time};
 
@@ -194,7 +194,7 @@ fn decode_datetime_from_text(value: &str) -> Option<PrimitiveDateTime> {
 
 mod formats {
     use time::format_description::BorrowedFormatItem::{Component, Literal, Optional};
-    use time::format_description::{modifier, BorrowedFormatItem, Component::*};
+    use time::format_description::{BorrowedFormatItem, Component::*, modifier};
 
     const YEAR: BorrowedFormatItem<'_> = Component(Year({
         let mut value = modifier::Year::default();

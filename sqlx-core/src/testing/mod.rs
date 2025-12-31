@@ -1,7 +1,7 @@
 use std::future::Future;
 use std::time::Duration;
 
-use base64::{engine::general_purpose::URL_SAFE, Engine as _};
+use base64::{Engine as _, engine::general_purpose::URL_SAFE};
 pub use fixtures::FixtureSnapshot;
 use sha2::{Digest, Sha512};
 
@@ -230,13 +230,13 @@ where
 
         let res = test_fn(test_context.pool_opts, test_context.connect_opts).await;
 
-        if res.is_success() {
-            if let Err(e) = DB::cleanup_test(&DB::db_name(&args)).await {
-                eprintln!(
-                    "failed to delete database {:?}: {}",
-                    test_context.db_name, e
-                );
-            }
+        if res.is_success()
+            && let Err(e) = DB::cleanup_test(&DB::db_name(&args)).await
+        {
+            eprintln!(
+                "failed to delete database {:?}: {}",
+                test_context.db_name, e
+            );
         }
 
         res

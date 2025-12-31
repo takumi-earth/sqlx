@@ -28,7 +28,8 @@ impl<'de> ProtocolDecode<'de, &'de [MySqlColumn]> for TextRow {
                         "buffer exhausted when reading data for column {:?}; decoded length is {}, but only {} bytes remain in buffer. Malformed packet or protocol error?",
                         c,
                         size,
-                        buf.remaining()));
+                        buf.remaining()
+                    ));
                 }
                 let size = usize::try_from(size)
                     .map_err(|_| err_protocol!("TextRow length out of range: {size}"))?;

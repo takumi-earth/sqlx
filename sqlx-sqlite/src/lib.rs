@@ -76,12 +76,12 @@ use std::sync::atomic::AtomicBool;
 
 pub use arguments::{SqliteArgumentValue, SqliteArguments, SqliteArgumentsBuffer};
 pub use column::SqliteColumn;
-#[cfg(feature = "deserialize")]
-#[cfg_attr(docsrs, doc(cfg(feature = "deserialize")))]
-pub use connection::deserialize::SqliteOwnedBuf;
 #[cfg(feature = "preupdate-hook")]
 #[cfg_attr(docsrs, doc(cfg(feature = "preupdate-hook")))]
 pub use connection::PreupdateHookResult;
+#[cfg(feature = "deserialize")]
+#[cfg_attr(docsrs, doc(cfg(feature = "deserialize")))]
+pub use connection::deserialize::SqliteOwnedBuf;
 pub use connection::{LockedSqliteHandle, SqliteConnection, SqliteOperation, UpdateHookResult};
 pub use database::Sqlite;
 pub use error::SqliteError;

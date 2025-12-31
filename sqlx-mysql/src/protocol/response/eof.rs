@@ -2,8 +2,8 @@ use bytes::{Buf, Bytes};
 
 use crate::error::Error;
 use crate::io::ProtocolDecode;
-use crate::protocol::response::Status;
 use crate::protocol::Capabilities;
+use crate::protocol::response::Status;
 
 /// Marks the end of a result set, returning status and warnings.
 ///

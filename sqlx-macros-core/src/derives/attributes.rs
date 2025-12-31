@@ -1,8 +1,8 @@
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote_spanned;
 use syn::{
-    parenthesized, punctuated::Punctuated, token::Comma, Attribute, DeriveInput, Field, LitStr,
-    Meta, Token, Type, Variant,
+    Attribute, DeriveInput, Field, LitStr, Meta, Token, Type, Variant, parenthesized,
+    punctuated::Punctuated, token::Comma,
 };
 
 macro_rules! assert_attribute {
@@ -172,7 +172,11 @@ pub fn parse_child_attributes(input: &[Attribute]) -> syn::Result<SqlxChildAttri
                     let content;
                     parenthesized!(content in meta.input);
                     let literal: Ident = content.parse()?;
-                    assert_eq!(literal.to_string(), "nullable", "Unrecognized `json` attribute. Valid values are `json` or `json(nullable)`");
+                    assert_eq!(
+                        literal.to_string(),
+                        "nullable",
+                        "Unrecognized `json` attribute. Valid values are `json` or `json(nullable)`"
+                    );
                     json = Some(JsonAttribute::Nullable);
                 } else {
                     json = Some(JsonAttribute::NonNullable);

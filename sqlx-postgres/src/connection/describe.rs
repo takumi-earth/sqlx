@@ -1,3 +1,4 @@
+use crate::HashMap;
 use crate::connection::TableColumns;
 use crate::error::Error;
 use crate::ext::ustr::UStr;
@@ -9,7 +10,6 @@ use crate::statement::PgStatementMetadata;
 use crate::type_info::{PgArrayOf, PgCustomType, PgType, PgTypeKind};
 use crate::types::Json;
 use crate::types::Oid;
-use crate::HashMap;
 use crate::{PgColumn, PgConnection, PgTypeInfo};
 use smallvec::SmallVec;
 use sqlx_core::column::{ColumnOrigin, TableColumn};
@@ -627,7 +627,7 @@ WHERE rngtypid = $1
         if let Some(Explain::Plan {
             plan:
                 plan @ Plan {
-                    output: Some(ref outputs),
+                    output: Some(outputs),
                     ..
                 },
         }) = explains.first()
@@ -656,11 +656,11 @@ fn visit_plan(plan: &Plan, outputs: &[String], nullables: &mut Vec<Option<bool>>
         }
     }
 
-    if let Some(plans) = &plan.plans {
-        if let Some("Left") | Some("Right") = plan.join_type.as_deref() {
-            for plan in plans {
-                visit_plan(plan, outputs, nullables);
-            }
+    if let Some(plans) = &plan.plans
+        && let Some("Left") | Some("Right") = plan.join_type.as_deref()
+    {
+        for plan in plans {
+            visit_plan(plan, outputs, nullables);
         }
     }
 }

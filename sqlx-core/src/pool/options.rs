@@ -1,8 +1,8 @@
 use crate::connection::Connection;
 use crate::database::Database;
 use crate::error::Error;
-use crate::pool::inner::PoolInner;
 use crate::pool::Pool;
+use crate::pool::inner::PoolInner;
 use futures_core::future::BoxFuture;
 use log::LevelFilter;
 use std::fmt::{self, Debug, Formatter};

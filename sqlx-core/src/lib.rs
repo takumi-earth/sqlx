@@ -97,7 +97,7 @@ pub mod config;
 pub use error::{Error, Result};
 
 pub use either::Either;
-pub use hashbrown::{hash_map, HashMap};
+pub use hashbrown::{HashMap, hash_map};
 pub use indexmap::IndexMap;
 pub use percent_encoding;
 pub use smallvec::SmallVec;
@@ -117,6 +117,6 @@ pub mod driver_prelude {
     };
 
     pub use crate::error::{Error, Result};
-    pub use crate::{hash_map, HashMap};
+    pub use crate::{HashMap, hash_map};
     pub use either::Either;
 }

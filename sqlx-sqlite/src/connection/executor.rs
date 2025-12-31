@@ -3,12 +3,12 @@ use crate::{
 };
 use futures_core::future::BoxFuture;
 use futures_core::stream::BoxStream;
-use futures_util::{stream, FutureExt, StreamExt, TryFutureExt, TryStreamExt};
+use futures_util::{FutureExt, StreamExt, TryFutureExt, TryStreamExt, stream};
+use sqlx_core::Either;
 use sqlx_core::describe::Describe;
 use sqlx_core::error::Error;
 use sqlx_core::executor::{Execute, Executor};
 use sqlx_core::sql_str::SqlStr;
-use sqlx_core::Either;
 use std::{future, pin::pin};
 
 impl<'c> Executor<'c> for &'c mut SqliteConnection {
@@ -57,11 +57,12 @@ impl<'c> Executor<'c> for &'c mut SqliteConnection {
 
         Box::pin(async move {
             let sql = query.sql();
-            let mut stream = pin!(self
-                .worker
-                .execute(sql, arguments, self.row_channel_size, persistent, Some(1))
-                .map_ok(flume::Receiver::into_stream)
-                .try_flatten_stream());
+            let mut stream = pin!(
+                self.worker
+                    .execute(sql, arguments, self.row_channel_size, persistent, Some(1))
+                    .map_ok(flume::Receiver::into_stream)
+                    .try_flatten_stream()
+            );
 
             while let Some(res) = stream.try_next().await? {
                 if let Either::Right(row) = res {

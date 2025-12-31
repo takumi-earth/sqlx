@@ -558,8 +558,8 @@ async fn test_from_row_json_try_from_attr() -> anyhow::Result<()> {
 #[cfg(all(mariadb, not(mariadb = "10_6"), feature = "time"))]
 #[sqlx_macros::test]
 async fn test_uuid_is_compatible_mariadb() -> anyhow::Result<()> {
-    use sqlx::types::time::OffsetDateTime;
     use sqlx::types::Uuid;
+    use sqlx::types::time::OffsetDateTime;
 
     struct Tweet {
         id: Uuid,

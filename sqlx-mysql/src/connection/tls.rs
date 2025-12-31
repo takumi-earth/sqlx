@@ -1,9 +1,9 @@
 use crate::connection::{MySqlStream, Waiting};
 use crate::error::Error;
 use crate::net::tls::TlsConfig;
-use crate::net::{tls, BufferedSocket, Socket, WithSocket};
-use crate::protocol::connect::SslRequest;
+use crate::net::{BufferedSocket, Socket, WithSocket, tls};
 use crate::protocol::Capabilities;
+use crate::protocol::connect::SslRequest;
 use crate::{MySqlConnectOptions, MySqlSslMode};
 use std::collections::VecDeque;
 

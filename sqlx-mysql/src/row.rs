@@ -2,11 +2,11 @@ use std::sync::Arc;
 
 pub(crate) use sqlx_core::row::*;
 
+use crate::HashMap;
 use crate::column::ColumnIndex;
 use crate::error::Error;
 use crate::ext::ustr::UStr;
-use crate::HashMap;
-use crate::{protocol, MySql, MySqlColumn, MySqlValueFormat, MySqlValueRef};
+use crate::{MySql, MySqlColumn, MySqlValueFormat, MySqlValueRef, protocol};
 
 /// Implementation of [`Row`] for MySQL.
 pub struct MySqlRow {

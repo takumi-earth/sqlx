@@ -1,9 +1,9 @@
-use sqlx::any::{AnyConnectOptions, AnyPoolOptions};
 use sqlx::Executor;
+use sqlx::any::{AnyConnectOptions, AnyPoolOptions};
 use sqlx_core::sql_str::AssertSqlSafe;
 use std::sync::{
-    atomic::{AtomicI32, AtomicUsize, Ordering},
     Arc, Mutex,
+    atomic::{AtomicI32, AtomicUsize, Ordering},
 };
 use std::time::Duration;
 

@@ -3,8 +3,8 @@
 use std::str::FromStr;
 
 use sqlx::sqlite::SqliteQueryResult;
-use sqlx::{query, Connection, SqliteConnection};
-use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions};
+use sqlx::{ConnectOptions, sqlite::SqliteConnectOptions};
+use sqlx::{Connection, SqliteConnection, query};
 use tempfile::TempDir;
 
 async fn new_db_url() -> anyhow::Result<(String, TempDir)> {
@@ -60,12 +60,13 @@ async fn it_encrypts() -> anyhow::Result<()> {
     // Create another connection without key, query should fail
     let mut conn = SqliteConnectOptions::from_str(&url)?.connect().await?;
 
-    assert!(conn
-        .transaction(|tx| {
+    assert!(
+        conn.transaction(|tx| {
             Box::pin(async move { query("SELECT * FROM Company;").fetch_all(&mut **tx).await })
         })
         .await
-        .is_err());
+        .is_err()
+    );
 
     Ok(())
 }
@@ -117,12 +118,13 @@ async fn it_fails_if_password_is_incorrect() -> anyhow::Result<()> {
         .connect()
         .await?;
 
-    assert!(conn
-        .transaction(|tx| {
+    assert!(
+        conn.transaction(|tx| {
             Box::pin(async move { query("SELECT * FROM Company;").fetch_all(&mut **tx).await })
         })
         .await
-        .is_err());
+        .is_err()
+    );
 
     Ok(())
 }

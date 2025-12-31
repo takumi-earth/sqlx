@@ -1,7 +1,7 @@
+use crate::Sqlite;
 use crate::encode::{Encode, IsNull};
 use crate::error::Error;
 use crate::statement::StatementHandle;
-use crate::Sqlite;
 use atoi::atoi;
 use libsqlite3_sys::SQLITE_OK;
 use std::sync::Arc;

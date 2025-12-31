@@ -1,12 +1,12 @@
-use crate::connection::explain::explain;
 use crate::connection::ConnectionState;
+use crate::connection::explain::explain;
 use crate::describe::Describe;
 use crate::error::Error;
 use crate::statement::VirtualStatement;
 use crate::type_info::DataType;
 use crate::{Sqlite, SqliteColumn};
-use sqlx_core::sql_str::SqlStr;
 use sqlx_core::Either;
+use sqlx_core::sql_str::SqlStr;
 use std::convert::identity;
 
 pub(crate) fn describe(
@@ -69,10 +69,10 @@ pub(crate) fn describe(
 
                 let mut ty = stmt.handle.column_type_info(col);
 
-                if ty.0 == DataType::Null {
-                    if let Some(fallback) = fallback.get(col).cloned() {
-                        ty = fallback;
-                    }
+                if ty.0 == DataType::Null
+                    && let Some(fallback) = fallback.get(col).cloned()
+                {
+                    ty = fallback;
                 }
 
                 ty

@@ -3,8 +3,8 @@ use bytes::{Buf, Bytes};
 use crate::error::Error;
 use crate::io::ProtocolEncode;
 use crate::io::{BufExt, ProtocolDecode};
-use crate::protocol::auth::AuthPlugin;
 use crate::protocol::Capabilities;
+use crate::protocol::auth::AuthPlugin;
 
 // https://dev.mysql.com/doc/dev/mysql-server/8.0.12/page_protocol_connection_phase_packets_protocol_auth_switch_request.html
 

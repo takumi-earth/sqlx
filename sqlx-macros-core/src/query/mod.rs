@@ -9,7 +9,7 @@ use sqlx_core::database::Database;
 use sqlx_core::{column::Column, describe::Describe, type_info::TypeInfo};
 
 use crate::database::DatabaseExt;
-use crate::query::data::{hash_string, DynQueryData, QueryData};
+use crate::query::data::{DynQueryData, QueryData, hash_string};
 use crate::query::input::RecordType;
 use crate::query::metadata::MacrosEnv;
 use either::Either;
@@ -200,12 +200,10 @@ where
         None => None,
     };
 
-    if let Some(num) = num_parameters {
-        if num != input.arg_exprs.len() {
-            return Err(
-                format!("expected {} parameters, got {}", num, input.arg_exprs.len()).into(),
-            );
-        }
+    if let Some(num) = num_parameters
+        && num != input.arg_exprs.len()
+    {
+        return Err(format!("expected {} parameters, got {}", num, input.arg_exprs.len()).into());
     }
 
     let mut warnings = Warnings::default();

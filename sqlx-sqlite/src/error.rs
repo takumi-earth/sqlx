@@ -5,9 +5,9 @@ use std::os::raw::c_int;
 use std::{borrow::Cow, str};
 
 use libsqlite3_sys::{
-    sqlite3, sqlite3_errmsg, sqlite3_errstr, sqlite3_extended_errcode, SQLITE_CONSTRAINT_CHECK,
-    SQLITE_CONSTRAINT_FOREIGNKEY, SQLITE_CONSTRAINT_NOTNULL, SQLITE_CONSTRAINT_PRIMARYKEY,
-    SQLITE_CONSTRAINT_UNIQUE, SQLITE_ERROR, SQLITE_NOMEM,
+    SQLITE_CONSTRAINT_CHECK, SQLITE_CONSTRAINT_FOREIGNKEY, SQLITE_CONSTRAINT_NOTNULL,
+    SQLITE_CONSTRAINT_PRIMARYKEY, SQLITE_CONSTRAINT_UNIQUE, SQLITE_ERROR, SQLITE_NOMEM, sqlite3,
+    sqlite3_errmsg, sqlite3_errstr, sqlite3_extended_errcode,
 };
 
 pub(crate) use sqlx_core::error::*;
@@ -23,7 +23,8 @@ pub struct SqliteError {
 
 impl SqliteError {
     pub(crate) unsafe fn new(handle: *mut sqlite3) -> Self {
-        Self::try_new(handle).expect("There should be an error")
+        // SAFETY: caller guarantees handle is valid
+        unsafe { Self::try_new(handle) }.expect("There should be an error")
     }
 
     pub(crate) unsafe fn try_new(handle: *mut sqlite3) -> Option<Self> {

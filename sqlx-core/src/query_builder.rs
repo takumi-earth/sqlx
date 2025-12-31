@@ -5,6 +5,7 @@ use std::fmt::Write;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
+use crate::Either;
 use crate::arguments::{Arguments, IntoArguments};
 use crate::database::Database;
 use crate::encode::Encode;
@@ -16,7 +17,6 @@ use crate::sql_str::AssertSqlSafe;
 use crate::sql_str::SqlSafeStr;
 use crate::sql_str::SqlStr;
 use crate::types::Type;
-use crate::Either;
 
 /// A builder type for constructing queries at runtime.
 ///

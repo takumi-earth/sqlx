@@ -5,10 +5,10 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::metadata::{manifest_dir, Metadata};
-use crate::opt::ConnectOpts;
 use crate::Config;
-use anyhow::{bail, Context};
+use crate::metadata::{Metadata, manifest_dir};
+use crate::opt::ConnectOpts;
+use anyhow::{Context, bail};
 use console::style;
 use sqlx::Connection;
 
@@ -123,7 +123,9 @@ async fn prepare_check(ctx: &PrepareCtx<'_>) -> anyhow::Result<()> {
         .next()
         .is_some()
     {
-        bail!("prepare check failed: .sqlx is missing one or more queries; you should re-run sqlx prepare");
+        bail!(
+            "prepare check failed: .sqlx is missing one or more queries; you should re-run sqlx prepare"
+        );
     }
     // Warn: files in .sqlx but not cache.
     if prepare_filenames
@@ -143,7 +145,10 @@ async fn prepare_check(ctx: &PrepareCtx<'_>) -> anyhow::Result<()> {
         let prepare_json = load_json_file(prepare_dir.join(&filename))?;
         let cache_json = load_json_file(cache_dir.join(&filename))?;
         if prepare_json != cache_json {
-            bail!("prepare check failed: one or more query files differ ({}); you should re-run sqlx prepare", filename);
+            bail!(
+                "prepare check failed: one or more query files differ ({}); you should re-run sqlx prepare",
+                filename
+            );
         }
     }
 

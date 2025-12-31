@@ -1,6 +1,6 @@
+use crate::PgValueFormat;
 use crate::io::{PgBufMutExt, PortalId, StatementId};
 use crate::message::{FrontendMessage, FrontendMessageFormat};
-use crate::PgValueFormat;
 use std::num::Saturating;
 
 /// <https://www.postgresql.org/docs/current/protocol-message-formats.html#PROTOCOL-MESSAGE-FORMATS-BIND>

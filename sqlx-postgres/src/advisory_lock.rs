@@ -1,6 +1,6 @@
-use crate::error::Result;
 use crate::Either;
 use crate::PgConnection;
+use crate::error::Result;
 use hkdf::Hkdf;
 use sha2::Sha256;
 use std::ops::{Deref, DerefMut};

@@ -7,8 +7,8 @@ use crate::types::Type;
 use crate::{Sqlite, SqliteArgumentValue, SqliteTypeInfo, SqliteValueRef};
 use std::sync::Arc;
 use uuid::{
-    fmt::{Hyphenated, Simple},
     Uuid,
+    fmt::{Hyphenated, Simple},
 };
 
 impl Type<Sqlite> for Uuid {

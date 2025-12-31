@@ -1,6 +1,6 @@
 use crate::message::{BackendMessage, BackendMessageFormat};
-use sqlx_core::bytes::Bytes;
 use sqlx_core::Error;
+use sqlx_core::bytes::Bytes;
 
 pub struct ParseComplete;
 

@@ -1,6 +1,6 @@
 use crate::opt::{ConnectOpts, MigrationSourceOpt};
-use crate::{migrate, Config};
-use console::{style, Term};
+use crate::{Config, migrate};
+use console::{Term, style};
 use dialoguer::Confirm;
 use sqlx::any::Any;
 use sqlx::migrate::MigrateDatabase;

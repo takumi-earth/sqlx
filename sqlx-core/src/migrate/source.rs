@@ -1,5 +1,5 @@
 use crate::error::BoxDynError;
-use crate::migrate::{migration, Migration, MigrationType};
+use crate::migrate::{Migration, MigrationType, migration};
 use crate::sql_str::{AssertSqlSafe, SqlSafeStr};
 use futures_core::future::BoxFuture;
 

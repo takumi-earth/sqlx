@@ -6,7 +6,7 @@ use crate::{
 use either::Either;
 use futures_core::future::BoxFuture;
 use futures_core::stream::BoxStream;
-use futures_util::{stream, FutureExt, StreamExt, TryFutureExt, TryStreamExt};
+use futures_util::{FutureExt, StreamExt, TryFutureExt, TryStreamExt, stream};
 use sqlx_core::any::{
     Any, AnyArguments, AnyColumn, AnyConnectOptions, AnyConnectionBackend, AnyQueryResult, AnyRow,
     AnyStatement, AnyTypeInfo, AnyTypeInfoKind,
@@ -87,7 +87,7 @@ impl AnyConnectionBackend for MySqlConnection {
         let arguments = match arguments.map(AnyArguments::convert_into).transpose() {
             Ok(arguments) => arguments,
             Err(error) => {
-                return stream::once(future::ready(Err(sqlx_core::Error::Encode(error)))).boxed()
+                return stream::once(future::ready(Err(sqlx_core::Error::Encode(error)))).boxed();
             }
         };
 
@@ -171,7 +171,7 @@ impl<'a> TryFrom<&'a MySqlTypeInfo> for AnyTypeInfo {
                 _ => {
                     return Err(sqlx_core::Error::AnyDriverError(
                         format!("Any driver does not support MySql type {type_info:?}").into(),
-                    ))
+                    ));
                 }
             },
         })

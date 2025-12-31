@@ -6,10 +6,10 @@ use futures_channel::mpsc;
 use futures_core::future::BoxFuture;
 use futures_core::stream::{BoxStream, Stream};
 use futures_util::{FutureExt, StreamExt, TryFutureExt, TryStreamExt};
+use sqlx_core::Either;
 use sqlx_core::acquire::Acquire;
 use sqlx_core::sql_str::{AssertSqlSafe, SqlStr};
 use sqlx_core::transaction::Transaction;
-use sqlx_core::Either;
 use tracing::Instrument;
 
 use crate::describe::Describe;

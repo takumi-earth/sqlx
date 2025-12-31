@@ -5,15 +5,15 @@
     clippy::cast_possible_wrap,
     clippy::cast_sign_loss
 )]
+use crate::SqliteTypeInfo;
 use crate::connection::intmap::IntMap;
-use crate::connection::{execute, ConnectionState};
+use crate::connection::{ConnectionState, execute};
 use crate::error::Error;
 use crate::from_row::FromRow;
 use crate::logger::{BranchParent, BranchResult, DebugDiff};
 use crate::type_info::DataType;
-use crate::SqliteTypeInfo;
 use sqlx_core::sql_str::AssertSqlSafe;
-use sqlx_core::{hash_map, HashMap};
+use sqlx_core::{HashMap, hash_map};
 use std::fmt::Debug;
 use std::str::from_utf8;
 
@@ -855,10 +855,10 @@ pub(super) fn explain(
                             let mut branch_state = state.new_branch(&mut branch_seq);
                             branch_state.mem.program_i = p2 as usize;
 
-                            if let Some(cur) = branch_state.mem.p.get(&p1) {
-                                if let Some(tab) = cur.table_mut(&mut branch_state.mem.t) {
-                                    tab.is_empty = Some(true);
-                                }
+                            if let Some(cur) = branch_state.mem.p.get(&p1)
+                                && let Some(tab) = cur.table_mut(&mut branch_state.mem.t)
+                            {
+                                tab.is_empty = Some(true);
                             }
                             states.push(branch_state, &mut logger);
                         }
@@ -1082,10 +1082,9 @@ pub(super) fn explain(
                         .p
                         .get(&p1)
                         .and_then(|cur| cur.table_mut(&mut state.mem.t))
+                        && *is_empty == Some(false)
                     {
-                        if *is_empty == Some(false) {
-                            *is_empty = None; //the cursor might be empty now
-                        }
+                        *is_empty = None; //the cursor might be empty now
                     }
                 }
 
@@ -1217,10 +1216,7 @@ pub(super) fn explain(
                         .and_then(|c| c.columns_mut(&mut state.mem.t, &mut state.mem.r))
                     {
                         for col in cols.values_mut() {
-                            if let ColumnType::Single {
-                                ref mut nullable, ..
-                            } = col
-                            {
+                            if let ColumnType::Single { nullable, .. } = col {
                                 *nullable = Some(true);
                             }
                         }
@@ -1313,17 +1309,17 @@ pub(super) fn explain(
                                 nullable: Some(false),
                             }),
                         );
-                    } else if p4.starts_with("lead(") || p4.starts_with("lag(") {
-                        if let Some(r_p2) = state.mem.r.get(&p2) {
-                            let datatype = r_p2.map_to_datatype();
-                            state.mem.r.insert(
-                                p3,
-                                RegDataType::Single(ColumnType::Single {
-                                    datatype,
-                                    nullable: Some(true),
-                                }),
-                            );
-                        }
+                    } else if (p4.starts_with("lead(") || p4.starts_with("lag("))
+                        && let Some(r_p2) = state.mem.r.get(&p2)
+                    {
+                        let datatype = r_p2.map_to_datatype();
+                        state.mem.r.insert(
+                            p3,
+                            RegDataType::Single(ColumnType::Single {
+                                datatype,
+                                nullable: Some(true),
+                            }),
+                        );
                     }
                 }
 
@@ -1541,67 +1537,79 @@ fn test_root_block_columns_has_types() {
         .establish()
         .unwrap();
 
-    assert!(execute::iter(
-        &mut conn,
-        r"CREATE TABLE t(a INTEGER PRIMARY KEY, b_null TEXT NULL, b TEXT NOT NULL);",
-        None,
-        false
-    )
-    .unwrap()
-    .next()
-    .is_some());
+    assert!(
+        execute::iter(
+            &mut conn,
+            r"CREATE TABLE t(a INTEGER PRIMARY KEY, b_null TEXT NULL, b TEXT NOT NULL);",
+            None,
+            false
+        )
+        .unwrap()
+        .next()
+        .is_some()
+    );
     assert!(
         execute::iter(&mut conn, r"CREATE INDEX i1 on t (a,b_null);", None, false)
             .unwrap()
             .next()
             .is_some()
     );
-    assert!(execute::iter(
-        &mut conn,
-        r"CREATE UNIQUE INDEX i2 on t (a,b_null);",
-        None,
-        false
-    )
-    .unwrap()
-    .next()
-    .is_some());
-    assert!(execute::iter(
-        &mut conn,
-        r"CREATE TABLE t2(a INTEGER NOT NULL, b_null NUMERIC NULL, b NUMERIC NOT NULL);",
-        None,
-        false
-    )
-    .unwrap()
-    .next()
-    .is_some());
-    assert!(execute::iter(
-        &mut conn,
-        r"CREATE INDEX t2i1 on t2 (a,b_null);",
-        None,
-        false
-    )
-    .unwrap()
-    .next()
-    .is_some());
-    assert!(execute::iter(
-        &mut conn,
-        r"CREATE UNIQUE INDEX t2i2 on t2 (a,b);",
-        None,
-        false
-    )
-    .unwrap()
-    .next()
-    .is_some());
+    assert!(
+        execute::iter(
+            &mut conn,
+            r"CREATE UNIQUE INDEX i2 on t (a,b_null);",
+            None,
+            false
+        )
+        .unwrap()
+        .next()
+        .is_some()
+    );
+    assert!(
+        execute::iter(
+            &mut conn,
+            r"CREATE TABLE t2(a INTEGER NOT NULL, b_null NUMERIC NULL, b NUMERIC NOT NULL);",
+            None,
+            false
+        )
+        .unwrap()
+        .next()
+        .is_some()
+    );
+    assert!(
+        execute::iter(
+            &mut conn,
+            r"CREATE INDEX t2i1 on t2 (a,b_null);",
+            None,
+            false
+        )
+        .unwrap()
+        .next()
+        .is_some()
+    );
+    assert!(
+        execute::iter(
+            &mut conn,
+            r"CREATE UNIQUE INDEX t2i2 on t2 (a,b);",
+            None,
+            false
+        )
+        .unwrap()
+        .next()
+        .is_some()
+    );
 
-    assert!(execute::iter(
-        &mut conn,
-        r"CREATE TEMPORARY TABLE t3(a TEXT PRIMARY KEY, b REAL NOT NULL, b_null REAL NULL);",
-        None,
-        false
-    )
-    .unwrap()
-    .next()
-    .is_some());
+    assert!(
+        execute::iter(
+            &mut conn,
+            r"CREATE TEMPORARY TABLE t3(a TEXT PRIMARY KEY, b REAL NOT NULL, b_null REAL NULL);",
+            None,
+            false
+        )
+        .unwrap()
+        .next()
+        .is_some()
+    );
 
     let table_block_nums: HashMap<String, (i64,i64)> = execute::iter(
         &mut conn,

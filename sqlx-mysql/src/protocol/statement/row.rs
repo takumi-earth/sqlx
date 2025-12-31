@@ -1,11 +1,11 @@
 use bytes::{Buf, Bytes};
 
+use crate::MySqlColumn;
 use crate::error::Error;
 use crate::io::MySqlBufExt;
 use crate::io::{BufExt, ProtocolDecode};
-use crate::protocol::text::ColumnType;
 use crate::protocol::Row;
-use crate::MySqlColumn;
+use crate::protocol::text::ColumnType;
 
 // https://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html#packet-ProtocolBinary::ResultsetRow
 // https://dev.mysql.com/doc/internals/en/binary-protocol-value.html

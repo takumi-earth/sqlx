@@ -2,7 +2,7 @@ use sqlx_core::bytes::Buf;
 
 use crate::decode::Decode;
 use crate::encode::Encode;
-use crate::error::{mismatched_types, BoxDynError};
+use crate::error::{BoxDynError, mismatched_types};
 use crate::type_info::TypeInfo;
 use crate::type_info::{PgType, PgTypeKind};
 use crate::types::Oid;
@@ -105,10 +105,11 @@ impl<'r> PgRecordDecoder<'r> {
                 let element_type_oid = Oid(self.buf.get_u32());
                 let element_type_opt = self.find_type_info(&self.typ, element_type_oid)?;
 
-                if let Some(ty) = &element_type_opt {
-                    if !ty.is_null() && !T::compatible(ty) {
-                        return Err(mismatched_types::<Postgres, T>(ty));
-                    }
+                if let Some(ty) = &element_type_opt
+                    && !ty.is_null()
+                    && !T::compatible(ty)
+                {
+                    return Err(mismatched_types::<Postgres, T>(ty));
                 }
 
                 let element_type =

@@ -1,4 +1,4 @@
-use sqlx::{error::ErrorKind, mysql::MySql, Connection, Error};
+use sqlx::{Connection, Error, error::ErrorKind, mysql::MySql};
 use sqlx_test::new;
 
 #[sqlx_macros::test]

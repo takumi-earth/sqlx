@@ -1,8 +1,8 @@
 use crate::decode::Decode;
 use crate::encode::{Encode, IsNull};
 use crate::error::BoxDynError;
-use crate::types::time::PG_EPOCH;
 use crate::types::Type;
+use crate::types::time::PG_EPOCH;
 use crate::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueFormat, PgValueRef, Postgres};
 use std::borrow::Cow;
 use std::mem;
@@ -74,7 +74,12 @@ impl<'r> Decode<'r, Postgres> for PrimitiveDateTime {
                 // This is given for timestamptz for some reason
                 // Postgres already guarantees this to always be UTC
                 if s.contains('+') {
-                    PrimitiveDateTime::parse(&s, &format_description!("[year]-[month]-[day] [hour]:[minute]:[second].[subsecond][offset_hour]"))?
+                    PrimitiveDateTime::parse(
+                        &s,
+                        &format_description!(
+                            "[year]-[month]-[day] [hour]:[minute]:[second].[subsecond][offset_hour]"
+                        ),
+                    )?
                 } else {
                     PrimitiveDateTime::parse(
                         &s,

@@ -1,7 +1,7 @@
 use crate::error::Error;
 use crate::{PgConnectOptions, PgSslMode};
-use sqlx_core::percent_encoding::{percent_decode_str, utf8_percent_encode, NON_ALPHANUMERIC};
 use sqlx_core::Url;
+use sqlx_core::percent_encoding::{NON_ALPHANUMERIC, percent_decode_str, utf8_percent_encode};
 use std::net::IpAddr;
 use std::str::FromStr;
 

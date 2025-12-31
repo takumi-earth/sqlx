@@ -1,10 +1,10 @@
-use crate::config::migrate::{DefaultMigrationType, DefaultVersioning};
 use crate::config::Config;
+use crate::config::migrate::{DefaultMigrationType, DefaultVersioning};
 use anyhow::Context;
 use chrono::Utc;
 use clap::{
-    builder::{styling::AnsiColor, Styles},
     Args, Parser,
+    builder::{Styles, styling::AnsiColor},
 };
 #[cfg(feature = "completions")]
 use clap_complete::Shell;

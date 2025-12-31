@@ -1,7 +1,7 @@
-use assert_cmd::{assert::Assert, Command};
+use assert_cmd::{assert::Assert, cargo_bin_cmd};
 
 use sqlx::_unstable::config::Config;
-use sqlx::{migrate::Migrate, Connection, SqliteConnection};
+use sqlx::{Connection, SqliteConnection, migrate::Migrate};
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -36,8 +36,7 @@ impl TestDatabase {
             config_path: None,
         };
 
-        Command::cargo_bin("cargo-sqlx")
-            .unwrap()
+        cargo_bin_cmd!("cargo-sqlx")
             .args([
                 "sqlx",
                 "database",
@@ -59,7 +58,7 @@ impl TestDatabase {
     }
 
     pub fn run_migration(&self, revert: bool, version: Option<i64>, dry_run: bool) -> Assert {
-        let mut command = Command::cargo_bin("sqlx").unwrap();
+        let mut command = cargo_bin_cmd!("sqlx");
         command
             .args([
                 "migrate",
@@ -104,7 +103,7 @@ impl TestDatabase {
     }
 
     pub fn migrate_info(&self) -> Assert {
-        let mut command = Command::cargo_bin("sqlx").unwrap();
+        let mut command = cargo_bin_cmd!("sqlx");
         command
             .args([
                 "migrate",

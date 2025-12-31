@@ -1,6 +1,6 @@
 use std::future::Future;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 
 use futures_channel::oneshot;
@@ -8,21 +8,21 @@ use futures_intrusive::sync::{Mutex, MutexGuard};
 use sqlx_core::sql_str::SqlStr;
 use tracing::span::Span;
 
+use sqlx_core::Either;
 use sqlx_core::describe::Describe;
 use sqlx_core::error::Error;
 use sqlx_core::transaction::{
     begin_ansi_transaction_sql, commit_ansi_transaction_sql, rollback_ansi_transaction_sql,
 };
-use sqlx_core::Either;
 
+use crate::connection::ConnectionState;
 use crate::connection::describe::describe;
 use crate::connection::establish::EstablishParams;
 use crate::connection::execute;
-use crate::connection::ConnectionState;
 use crate::{Sqlite, SqliteArguments, SqliteQueryResult, SqliteRow, SqliteStatement};
 
 #[cfg(feature = "deserialize")]
-use crate::connection::deserialize::{deserialize, serialize, SchemaName, SqliteOwnedBuf};
+use crate::connection::deserialize::{SchemaName, SqliteOwnedBuf, deserialize, serialize};
 
 // Each SQLite connection has a dedicated thread.
 
@@ -190,8 +190,8 @@ impl ConnectionWorker {
                                     let mut rows_returned = 0;
 
                                     while let Some(res) = iter.next() {
-                                        if let Ok(ok) = &res {
-                                            if ok.is_right() {
+                                        if let Ok(ok) = &res
+                                            && ok.is_right() {
                                                 rows_returned += 1;
                                                 if rows_returned >= limit {
                                                     drop(iter);
@@ -199,7 +199,6 @@ impl ConnectionWorker {
                                                     break;
                                                 }
                                             }
-                                        }
                                         let has_error = res.is_err();
                                         if tx.send(res).is_err() || has_error {
                                             break;
@@ -302,15 +301,14 @@ impl ConnectionWorker {
 
                             let res_ok = res.is_ok();
 
-                            if let Some(tx) = tx {
-                                if tx.blocking_send(res).is_err() && res_ok {
+                            if let Some(tx) = tx
+                                && tx.blocking_send(res).is_err() && res_ok {
                                     // The ROLLBACK was processed but not acknowledged. This means
                                     // that the `Transaction` doesn't know it was rolled back and
                                     // will try to rollback again on drop. We need to ignore that
                                     // rollback.
                                     ignore_next_start_rollback = true;
                                 }
-                            }
                         }
                         #[cfg(feature = "deserialize")]
                         Command::Serialize { schema, tx } => {
@@ -483,7 +481,7 @@ impl ConnectionWorker {
     /// Send a command to the worker to shut down the processing thread.
     ///
     /// A `WorkerCrashed` error may be returned if the thread has already stopped.
-    pub(crate) fn shutdown(&mut self) -> impl Future<Output = Result<(), Error>> {
+    pub(crate) fn shutdown(&mut self) -> impl Future<Output = Result<(), Error>> + use<> {
         let (tx, rx) = oneshot::channel();
 
         let send_res = self

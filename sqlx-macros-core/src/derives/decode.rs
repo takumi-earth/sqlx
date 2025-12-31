@@ -8,8 +8,8 @@ use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
 use syn::{
-    parse_quote, Arm, Data, DataEnum, DataStruct, DeriveInput, Field, Fields, FieldsNamed, Stmt,
-    TypeParamBound, Variant,
+    Arm, Data, DataEnum, DataStruct, DeriveInput, Field, Fields, FieldsNamed, Stmt, TypeParamBound,
+    Variant, parse_quote,
 };
 
 pub fn expand_derive_decode(input: &DeriveInput) -> syn::Result<TokenStream> {

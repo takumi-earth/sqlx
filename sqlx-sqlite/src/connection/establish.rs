@@ -1,12 +1,12 @@
-use crate::connection::handle::ConnectionHandle;
+use crate::SqliteConnectOptions;
 use crate::connection::LogSettings;
+use crate::connection::handle::ConnectionHandle;
 use crate::connection::{ConnectionState, Statements};
 use crate::error::Error;
-use crate::SqliteConnectOptions;
 use libsqlite3_sys::{
-    sqlite3_busy_timeout, SQLITE_OPEN_CREATE, SQLITE_OPEN_FULLMUTEX, SQLITE_OPEN_MEMORY,
-    SQLITE_OPEN_NOMUTEX, SQLITE_OPEN_PRIVATECACHE, SQLITE_OPEN_READONLY, SQLITE_OPEN_READWRITE,
-    SQLITE_OPEN_SHAREDCACHE, SQLITE_OPEN_URI,
+    SQLITE_OPEN_CREATE, SQLITE_OPEN_FULLMUTEX, SQLITE_OPEN_MEMORY, SQLITE_OPEN_NOMUTEX,
+    SQLITE_OPEN_PRIVATECACHE, SQLITE_OPEN_READONLY, SQLITE_OPEN_READWRITE, SQLITE_OPEN_SHAREDCACHE,
+    SQLITE_OPEN_URI, sqlite3_busy_timeout,
 };
 use percent_encoding::NON_ALPHANUMERIC;
 use std::collections::BTreeMap;
@@ -194,7 +194,7 @@ impl EstablishParams {
     #[cfg(feature = "load-extension")]
     unsafe fn apply_extensions(&self, handle: &mut ConnectionHandle) -> Result<(), Error> {
         use libsqlite3_sys::{sqlite3_free, sqlite3_load_extension};
-        use std::ffi::{c_int, CStr};
+        use std::ffi::{CStr, c_int};
         use std::ptr;
 
         /// `true` enables *just* `sqlite3_load_extension`, false disables *all* extension loading.
@@ -202,7 +202,7 @@ impl EstablishParams {
             handle: &mut ConnectionHandle,
             enabled: bool,
         ) -> Result<(), Error> {
-            use libsqlite3_sys::{sqlite3_db_config, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION};
+            use libsqlite3_sys::{SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, sqlite3_db_config};
 
             // SAFETY: we have exclusive access and this matches the expected signature
             // <https://www.sqlite.org/c3ref/c_dbconfig_defensive.html#sqlitedbconfigenableloadextension>

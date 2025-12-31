@@ -1,12 +1,12 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{
-    parse_quote, punctuated::Punctuated, token::Comma, Data, DataStruct, DeriveInput, Expr, Field,
-    Fields, FieldsNamed, FieldsUnnamed, Lifetime, Stmt,
+    Data, DataStruct, DeriveInput, Expr, Field, Fields, FieldsNamed, FieldsUnnamed, Lifetime, Stmt,
+    parse_quote, punctuated::Punctuated, token::Comma,
 };
 
 use super::{
-    attributes::{parse_child_attributes, parse_container_attributes, JsonAttribute},
+    attributes::{JsonAttribute, parse_child_attributes, parse_container_attributes},
     rename_all,
 };
 

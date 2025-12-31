@@ -2,7 +2,7 @@
 name = "sqlx-cli"
 version.workspace = true
 description = "Command-line utility for SQLx, the Rust SQL toolkit."
-edition = "2021"
+edition.workspace = true
 readme = "README.md"
 homepage = "https://github.com/launchbadge/sqlx"
 repository = "https://github.com/launchbadge/sqlx"
@@ -26,22 +26,22 @@ name = "cargo-sqlx"
 path = "src/bin/cargo-sqlx.rs"
 
 [dependencies]
-dotenvy = "0.15.0"
-tokio = { version = "1.15.0", features = ["macros", "rt", "rt-multi-thread", "signal"] }
-futures-util = { version = "0.3.19", features = ["alloc"] }
-clap = { version = "4.3.10", features = ["derive", "env", "wrap_help"] }
-clap_complete = { version = "4.3.1", optional = true }
-chrono = { version = "0.4.19", default-features = false, features = ["clock"] }
-anyhow = "1.0.52"
-console = "0.15.0"
-dialoguer = { version = "0.11", default-features = false }
-serde_json = "1.0.73"
-glob = "0.3.0"
-openssl = { version = "0.10.38", optional = true }
-cargo_metadata = "0.18.1"
-filetime = "0.2"
+dotenvy = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal"] }
+futures-util = { workspace = true }
+clap = { workspace = true }
+clap_complete = { workspace = true, optional = true }
+chrono = { workspace = true }
+anyhow = { workspace = true }
+console = { workspace = true }
+dialoguer = { workspace = true }
+serde_json = { workspace = true }
+glob = { workspace = true }
+openssl = { workspace = true, optional = true }
+cargo_metadata = { workspace = true }
+filetime = { workspace = true }
 
-backoff = { version = "0.4.0", features = ["futures", "tokio"] }
+backoff = { workspace = true }
 
 [dependencies.sqlx]
 workspace = true
@@ -76,8 +76,8 @@ sqlx-toml = ["sqlx/sqlx-toml"]
 _sqlite = []
 
 [dev-dependencies]
-assert_cmd = "2.1.1"
-tempfile = "3.10.1"
+assert_cmd = { workspace = true }
+tempfile = { workspace = true }
 
 [lints]
 workspace = true

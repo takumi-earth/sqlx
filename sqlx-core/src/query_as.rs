@@ -10,7 +10,7 @@ use crate::encode::Encode;
 use crate::error::{BoxDynError, Error};
 use crate::executor::{Execute, Executor};
 use crate::from_row::FromRow;
-use crate::query::{query, query_statement, query_statement_with, query_with_result, Query};
+use crate::query::{Query, query, query_statement, query_statement_with, query_with_result};
 use crate::sql_str::{SqlSafeStr, SqlStr};
 use crate::types::Type;
 
