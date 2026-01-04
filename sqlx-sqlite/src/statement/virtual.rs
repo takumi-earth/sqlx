@@ -37,13 +37,13 @@ pub struct VirtualStatement {
     /// underlying sqlite handles for each inner statement
     /// a SQL query string in SQLite is broken up into N statements
     /// we use a [`SmallVec`] to optimize for the most likely case of a single statement
-    pub(crate) handles: SmallVec<[StatementHandle; 1]>,
+    pub(crate) handles: SmallVec<StatementHandle, 1>,
 
     // each set of columns
-    pub(crate) columns: SmallVec<[Arc<Vec<SqliteColumn>>; 1]>,
+    pub(crate) columns: SmallVec<Arc<Vec<SqliteColumn>>, 1>,
 
     // each set of column names
-    pub(crate) column_names: SmallVec<[Arc<HashMap<UStr, usize>>; 1]>,
+    pub(crate) column_names: SmallVec<Arc<HashMap<UStr, usize>>, 1>,
 }
 
 pub struct PreparedStatement<'a> {

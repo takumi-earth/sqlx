@@ -64,7 +64,10 @@ impl PgConnectOptions {
             .or_else(|| var("PGHOST").ok())
             .unwrap_or_else(|| default_host(port));
 
-        let username = var("PGUSER").ok().unwrap_or_else(whoami::username);
+        let username = var("PGUSER")
+            .ok()
+            .or_else(|| whoami::username().ok())
+            .unwrap_or_default();
 
         let database = var("PGDATABASE").ok();
 

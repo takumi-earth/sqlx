@@ -619,7 +619,7 @@ WHERE rngtypid = $1
             explain += ")";
         }
 
-        let (Json(explains),): (Json<SmallVec<[Explain; 1]>>,) =
+        let (Json(explains),): (Json<SmallVec<Explain, 1>>,) =
             query_as(AssertSqlSafe(explain)).fetch_one(self).await?;
 
         let mut nullables = Vec::new();

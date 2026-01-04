@@ -3,7 +3,7 @@ use crate::connection::stream::PgStream;
 use crate::error::Error;
 use crate::message::{Authentication, AuthenticationSasl, SaslInitialResponse, SaslResponse};
 use crate::rt;
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, HmacReset, KeyInit, Mac};
 use rand::Rng;
 use sha2::{Digest, Sha256};
 use stringprep::saslprep;
@@ -163,8 +163,8 @@ pub(crate) async fn authenticate(
 
 // nonce is a sequence of random printable bytes
 fn gen_nonce() -> String {
-    let mut rng = rand::thread_rng();
-    let count = rng.gen_range(64..128);
+    let mut rng = rand::rng();
+    let count = rng.random_range(64..128);
 
     // printable = %x21-2B / %x2D-7E
     // ;; Printable ASCII except ",".
@@ -172,10 +172,10 @@ fn gen_nonce() -> String {
     // ;; a valid "value".
     let nonce: String = std::iter::repeat(())
         .map(|()| {
-            let mut c = rng.gen_range(0x21u8..0x7F);
+            let mut c = rng.random_range(0x21u8..0x7F);
 
             while c == 0x2C {
-                c = rng.gen_range(0x21u8..0x7F);
+                c = rng.random_range(0x21u8..0x7F);
             }
 
             c
@@ -184,13 +184,13 @@ fn gen_nonce() -> String {
         .map(|c| c as char)
         .collect();
 
-    rng.gen_range(32..128);
+    rng.random_range(32..128);
     format!("{NONCE_ATTR}={nonce}")
 }
 
 // Hi(str, salt, i):
 async fn hi<'a>(s: &'a str, salt: &'a [u8], iter_count: u32) -> Result<[u8; 32], Error> {
-    let mut mac = Hmac::<Sha256>::new_from_slice(s.as_bytes()).map_err(Error::protocol)?;
+    let mut mac = HmacReset::<Sha256>::new_from_slice(s.as_bytes()).map_err(Error::protocol)?;
 
     mac.update(salt);
     mac.update(&1u32.to_be_bytes());

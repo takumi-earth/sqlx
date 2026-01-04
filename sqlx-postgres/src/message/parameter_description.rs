@@ -7,7 +7,7 @@ use crate::types::Oid;
 
 #[derive(Debug)]
 pub struct ParameterDescription {
-    pub types: SmallVec<[Oid; 6]>,
+    pub types: SmallVec<Oid, 6>,
 }
 
 impl BackendMessage for ParameterDescription {

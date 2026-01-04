@@ -56,7 +56,6 @@ bitflags = { workspace = true, features = ["serde"] }
 byteorder = { workspace = true }
 bytes = { workspace = true }
 either = { workspace = true }
-generic-array = { workspace = true }
 hex = { workspace = true }
 itoa = { workspace = true }
 log = { workspace = true }

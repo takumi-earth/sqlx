@@ -35,7 +35,7 @@ futures-util = { workspace = true }
 # Cryptographic Primitives
 crc = { workspace = true }
 hkdf = { workspace = true }
-hmac = { workspace = true, features = ["reset"] }
+hmac = { workspace = true }
 md-5 = { workspace = true }
 rand = { workspace = true }
 sha2 = { workspace = true }
