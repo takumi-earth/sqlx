@@ -40,7 +40,7 @@ authors = [
     "Chloe Ross <orangesnowfox@gmail.com>",
     "Daniel Akhterov <akhterovd@gmail.com>",
 ]
-rust-version = "1.92.0"
+rust-version = "1.93.0"
 
 [package]
 name = "sqlx"
@@ -177,20 +177,20 @@ sqlx = { version = "=0.9.0-alpha.1", path = ".", default-features = false }
 
 # Common type integrations shared by multiple driver crates.
 # These are optional unless enabled in a workspace crate.
-bigdecimal = "0.4.0"
+bigdecimal = "0.4.10"
 bit-vec = "0.8"
-chrono = { version = "0.4.34", default-features = false, features = ["std", "clock"] }
-ipnet = "2.3.0"
+chrono = { version = "0.4.43", default-features = false, features = ["std", "clock"] }
+ipnet = "2.11.0"
 ipnetwork = "0.21.1"
-mac_address = "1.1.5"
-rust_decimal = { version = "1.26.1", default-features = false, features = ["std"] }
-time = { version = "0.3.36", features = ["formatting", "parsing", "macros"] }
-uuid = "1.1.2"
+mac_address = "1.1.8"
+rust_decimal = { version = "1.40.0", default-features = false, features = ["std"] }
+time = { version = "0.3.46", features = ["formatting", "parsing", "macros"] }
+uuid = "1.20.0"
 
 # Common utility crates
-cfg-if = "1.0.0"
-dotenvy = { version = "0.15.0", default-features = false }
-thiserror = { version = "2.0.17", default-features = false, features = ["std"] }
+cfg-if = "1.0.4"
+dotenvy = { version = "0.15.7", default-features = false }
+thiserror = { version = "2.0.18", default-features = false, features = ["std"] }
 
 # Runtimes
 [workspace.dependencies.async-global-executor]
@@ -212,75 +212,75 @@ default-features = false
 
 # Futures Ecosystem
 [workspace.dependencies.futures-core]
-version = "0.3.19"
+version = "0.3.31"
 default-features = false
 
 [workspace.dependencies.futures-channel]
-version = "0.3.19"
+version = "0.3.31"
 default-features = false
 features = ["sink", "alloc", "std"]
 
 [workspace.dependencies.futures-util]
-version = "0.3.19"
+version = "0.3.31"
 default-features = false
 features = ["alloc", "sink", "io"]
 
 [workspace.dependencies.futures-io]
-version = "0.3.24"
+version = "0.3.31"
 
 [workspace.dependencies.futures-intrusive]
 version = "0.5.0"
 
 [workspace.dependencies.futures-executor]
-version = "0.3.19"
+version = "0.3.31"
 
 # Cryptographic
 [workspace.dependencies.sha2]
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 default-features = false
 
 [workspace.dependencies.sha1]
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 default-features = false
 
 [workspace.dependencies.crc]
 version = "3"
 
 [workspace.dependencies.hkdf]
-version = "0.13.0-rc.3"
+version = "0.13.0-rc.4"
 
 [workspace.dependencies.hmac]
-version = "0.13.0-rc.3"
+version = "0.13.0-rc.4"
 default-features = false
 
 [workspace.dependencies.md-5]
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 default-features = false
 
 [workspace.dependencies.rand]
-version = "0.10.0-rc.6"
+version = "0.10.0-rc.7"
 default-features = false
 features = ["std", "std_rng", "thread_rng"]
 
 [workspace.dependencies.rsa]
-version = "0.10.0-rc.11"
+version = "0.10.0-rc.13"
 
 [workspace.dependencies.digest]
-version = "0.11.0-rc.5"
+version = "0.11.0-rc.9"
 default-features = false
 
 # Serialization
 [workspace.dependencies.serde]
-version = "1.0.218"
+version = "1.0.228"
 default-features = false
 features = ["derive"]
 
 [workspace.dependencies.serde_json]
-version = "1.0.85"
+version = "1.0.149"
 features = ["raw_value"]
 
 [workspace.dependencies.toml]
-version = "0.9.10"
+version = "0.9.11"
 
 # String/Parsing
 [workspace.dependencies.atoi]
@@ -290,46 +290,46 @@ version = "2.0"
 version = "0.4.3"
 
 [workspace.dependencies.percent-encoding]
-version = "2.1.0"
+version = "2.3.2"
 
 [workspace.dependencies.stringprep]
-version = "0.1.2"
+version = "0.1.5"
 
 [workspace.dependencies.url]
-version = "2.2.2"
+version = "2.5.8"
 
 [workspace.dependencies.base64]
-version = "0.22.0"
+version = "0.22.1"
 default-features = false
 features = ["std"]
 
 [workspace.dependencies.memchr]
-version = "2.4.1"
+version = "2.7.6"
 default-features = false
 
 [workspace.dependencies.bstr]
-version = "1.0"
+version = "1.12"
 default-features = false
 features = ["std"]
 
 # General Utilities
 [workspace.dependencies.bytes]
-version = "1.1.0"
+version = "1.11.0"
 
 [workspace.dependencies.byteorder]
-version = "1.4.3"
+version = "1.5.0"
 default-features = false
 features = ["std"]
 
 [workspace.dependencies.either]
-version = "1.6.1"
+version = "1.15.0"
 
 [workspace.dependencies.log]
-version = "0.4.18"
+version = "0.4.29"
 default-features = false
 
 [workspace.dependencies.tracing]
-version = "0.1.37"
+version = "0.1.44"
 features = ["log"]
 
 [workspace.dependencies.smallvec]
@@ -340,68 +340,68 @@ version = "2"
 default-features = false
 
 [workspace.dependencies.whoami]
-version = "2.0.0"
+version = "2.0.2"
 default-features = false
 
 [workspace.dependencies.itoa]
-version = "1.0.1"
+version = "1.0.17"
 
 # TLS
 [workspace.dependencies.native-tls]
-version = "0.2.10"
+version = "0.2.14"
 
 [workspace.dependencies.rustls]
-version = "0.23.24"
+version = "0.23.36"
 default-features = false
 features = ["std", "tls12"]
 
 [workspace.dependencies.webpki-roots]
-version = "1.0.4"
+version = "1.0.5"
 
 [workspace.dependencies.rustls-native-certs]
-version = "0.8.0"
+version = "0.8.3"
 
 # Async I/O
 [workspace.dependencies.async-fs]
-version = "2.1"
+version = "2.2"
 
 [workspace.dependencies.async-io]
-version = "2.4.1"
+version = "2.6.0"
 
 [workspace.dependencies.async-task]
 version = "4.7.1"
 
 [workspace.dependencies.tokio-stream]
-version = "0.1.8"
+version = "0.1.18"
 features = ["fs"]
 
 [workspace.dependencies.crossbeam-queue]
-version = "0.3.2"
+version = "0.3.12"
 
 [workspace.dependencies.event-listener]
-version = "5.2.0"
+version = "5.4.1"
 
 # Data Structures
 [workspace.dependencies.hashlink]
 version = "0.11.0"
 
 [workspace.dependencies.indexmap]
-version = "2.0"
+version = "2.13"
 
 [workspace.dependencies.hashbrown]
-version = "0.16.0"
+version = "0.16.1"
 
 # Macro/Proc-macro
 [workspace.dependencies.proc-macro2]
-version = "1.0.79"
+version = "1.0.106"
 default-features = false
 
 [workspace.dependencies.syn]
-version = "2.0.52"
+version = "2.0.114"
 default-features = false
 
 [workspace.dependencies.quote]
-version = "1.0.26"
+version = "1.0.44"
 default-features = false
 
 [workspace.dependencies.heck]
@@ -419,28 +419,28 @@ default-features = false
 features = ["async"]
 
 [workspace.dependencies.regex]
-version = "1.5.5"
+version = "1.12.2"
 
 [workspace.dependencies.serde_urlencoded]
 version = "0.7"
 
 # PostgreSQL-specific
 [workspace.dependencies.num-bigint]
-version = "0.4.3"
+version = "0.4.6"
 
 [workspace.dependencies.home]
-version = "0.5.5"
+version = "0.5.12"
 
 [workspace.dependencies.etcetera]
 version = "0.11.0"
 
 # CLI-specific
 [workspace.dependencies.clap]
-version = "4.3.10"
+version = "4.5.54"
 features = ["derive", "env", "wrap_help"]
 
 [workspace.dependencies.clap_complete]
-version = "4.3.1"
+version = "4.5.65"
 
 [workspace.dependencies.console]
 version = "0.16.2"
@@ -450,7 +450,7 @@ version = "0.12.0"
 default-features = false
 
 [workspace.dependencies.glob]
-version = "0.3.0"
+version = "0.3.3"
 
 [workspace.dependencies.cargo_metadata]
 version = "0.23.1"
@@ -463,17 +463,17 @@ version = "0.4.0"
 features = ["futures", "tokio"]
 
 [workspace.dependencies.openssl]
-version = "0.10.38"
+version = "0.10.75"
 
 [workspace.dependencies.anyhow]
-version = "1.0.52"
+version = "1.0.100"
 
 # Dev/Test
 [workspace.dependencies.tempfile]
-version = "3.10.1"
+version = "3.24.0"
 
 [workspace.dependencies.assert_cmd]
-version = "2.1.1"
+version = "2.1.2"
 
 [workspace.dependencies.env_logger]
 version = "0.11"
@@ -483,10 +483,10 @@ version = "0.8.1"
 features = ["async_tokio"]
 
 [workspace.dependencies.trybuild]
-version = "1.0.53"
+version = "1.0.114"
 
 [workspace.dependencies.paste]
-version = "1.0.6"
+version = "1.0.15"
 
 [workspace.dependencies.rand_chacha]
 version = "0.10.0-rc.6"
@@ -501,11 +501,11 @@ sqlx-sqlite = { workspace = true, optional = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }
-time_ = { version = "0.3.2", package = "time" }
+time_ = { version = "0.3.46", package = "time" }
 futures-util = { workspace = true }
 env_logger = { workspace = true }
 async-std = { workspace = true, features = ["attributes"] }
-tokio = { version = "1.15.0", features = ["full"] }
+tokio = { version = "1.49.0", features = ["full"] }
 dotenvy = { workspace = true }
 trybuild = { workspace = true }
 sqlx-test = { path = "./sqlx-test" }
@@ -519,6 +519,13 @@ hex = { workspace = true }
 tempfile = { workspace = true }
 criterion = { workspace = true }
 libsqlite3-sys = { version = "0.36.0" }
+
+[patch.crates-io]
+rand = { git = "https://github.com/earthlings-dev/rand.git" }
+rand_core = { git = "https://github.com/earthlings-dev/rand_core.git" }
+rand_chacha = { git = "https://github.com/earthlings-dev/rngs.git" }
+crypto-primes = { git = "https://github.com/earthlings-dev/crypto-primes.git" }
+rsa = { git = "https://github.com/earthlings-dev/rsa.git" }
 
 # If this is an unconditional dev-dependency then Cargo will *always* try to build `libsqlite3-sys`,
 # even when SQLite isn't the intended test target, and fail if the build environment is not set up for compiling C code.

@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use axum::{routing::post, Extension, Json, Router};
-use rand::Rng;
+use rand::RngExt;
 use regex::Regex;
 use std::{sync::LazyLock, time::Duration};
 
@@ -24,7 +24,7 @@ static USERNAME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[0-9A-Za
 #[derive(Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct UserAuth {
-    #[validate(length(min = 3, max = 16), regex = "USERNAME_REGEX")]
+    #[validate(length(min = 3, max = 16), regex(path = "USERNAME_REGEX"))]
     username: String,
     #[validate(length(min = 8, max = 32))]
     password: String,
@@ -83,8 +83,9 @@ impl UserAuth {
         }
 
         // Sleep a random amount of time to avoid leaking existence of a user in timing.
+        let mut rng = rand::rng();
         let sleep_duration =
-            rand::thread_rng().gen_range(Duration::from_millis(100)..=Duration::from_millis(500));
+            rng.random_range(Duration::from_millis(100)..=Duration::from_millis(500));
         tokio::time::sleep(sleep_duration).await;
 
         Err(Error::UnprocessableEntity(

@@ -4,7 +4,7 @@ use crate::error::Error;
 use crate::message::{Authentication, AuthenticationSasl, SaslInitialResponse, SaslResponse};
 use crate::rt;
 use hmac::{Hmac, HmacReset, KeyInit, Mac};
-use rand::Rng;
+use rand::RngExt;
 use sha2::{Digest, Sha256};
 use stringprep::saslprep;
 

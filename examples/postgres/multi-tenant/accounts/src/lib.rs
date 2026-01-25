@@ -1,6 +1,7 @@
 use argon2::{password_hash, Argon2, PasswordHasher, PasswordVerifier};
 use password_hash::PasswordHashString;
-use rand::distributions::{Alphanumeric, DistString};
+use password_hash::rand_core::OsRng;
+use rand::distr::{Alphanumeric, DistString};
 use sqlx::{Acquire, Executor, PgTransaction, Postgres};
 use std::sync::Arc;
 use uuid::Uuid;
@@ -129,7 +130,7 @@ impl AccountsManager {
         // We transfer ownership to the blocking task and back to ensure Tokio doesn't spawn
         // excess threads.
         let (_guard, res) = tokio::task::spawn_blocking(move || {
-            let salt = password_hash::SaltString::generate(rand::thread_rng());
+            let salt = password_hash::SaltString::generate(OsRng);
             (
                 guard,
                 Argon2::default()
@@ -279,6 +280,7 @@ impl SessionToken {
     const LEN: usize = 32;
 
     fn generate() -> Self {
-        SessionToken(Alphanumeric.sample_string(&mut rand::thread_rng(), Self::LEN))
+        let mut rng = rand::rng();
+        SessionToken(Alphanumeric.sample_string(&mut rng, Self::LEN))
     }
 }

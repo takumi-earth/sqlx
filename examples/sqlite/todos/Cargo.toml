@@ -8,4 +8,4 @@ workspace = "../../../"
 anyhow = "1.0"
 sqlx = { path = "../../../", features = [ "sqlite", "runtime-tokio", "tls-native-tls" ] }
 clap = { version = "4", features = ["derive"] }
-tokio = { version = "1.20.0", features = ["rt", "macros"]}
+tokio = { version = "1.49.0", features = ["rt", "macros"]}
